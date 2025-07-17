@@ -10,3 +10,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LinkingTo: 
     cpp11
+SystemRequirements:
+    blosc:
+        blosc-devel (rpm) or libblosc-dev (deb).
