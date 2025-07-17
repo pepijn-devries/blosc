@@ -1,1 +1,0 @@
-PKG_LIBS= -lblosc -llz4 -lzstd -lz
