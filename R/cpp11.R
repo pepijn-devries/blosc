@@ -19,3 +19,7 @@ blosc_compress <- function(data, level, doshuffle, typesize) {
 blosc_decompress <- function(data) {
   .Call(`_blosc_blosc_decompress`, data)
 }
+
+dtype_to_r <- function(data, dtype, na_value) {
+  .Call(`_blosc_dtype_to_r`, data, dtype, na_value)
+}

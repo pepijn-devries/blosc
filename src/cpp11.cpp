@@ -41,6 +41,13 @@ extern "C" SEXP _blosc_blosc_decompress(SEXP data) {
     return cpp11::as_sexp(blosc_decompress(cpp11::as_cpp<cpp11::decay_t<raws>>(data)));
   END_CPP11
 }
+// code.cpp
+sexp dtype_to_r(raws data, std::string dtype, double na_value);
+extern "C" SEXP _blosc_dtype_to_r(SEXP data, SEXP dtype, SEXP na_value) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dtype_to_r(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<double>>(na_value)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
@@ -48,6 +55,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_blosc_blosc_decompress", (DL_FUNC) &_blosc_blosc_decompress, 1},
     {"_blosc_blosc_test",       (DL_FUNC) &_blosc_blosc_test,       0},
     {"_blosc_blosc_version",    (DL_FUNC) &_blosc_blosc_version,    0},
+    {"_blosc_dtype_to_r",       (DL_FUNC) &_blosc_dtype_to_r,       3},
     {"_blosc_nthreads",         (DL_FUNC) &_blosc_nthreads,         0},
     {NULL, NULL, 0}
 };

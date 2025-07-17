@@ -49,3 +49,21 @@ raws blosc_decompress(raws data) {
   if (test < 0) stop("Failed to decompress data");
   return result;
 }
+
+[[cpp11::register]]
+sexp dtype_to_r(raws data, std::string dtype, double na_value) {
+  if (dtype == "<f4") {
+    float *src = (float *)(RAW(as_sexp(data)));
+    size_t len = data.size()/sizeof(float);
+    writable::doubles d((R_xlen_t)len);
+    for (uint32_t i = 0; i < len; i++) {
+      double s = (double)src[i];
+      if (src[i] == (float)na_value) s = NA_REAL;
+      d[(int)i] = s;
+    }
+    return d;
+  } else {
+    stop("The 'dtype' '%s' is not implemented", dtype.c_str());
+  }
+  return R_NilValue;
+}
