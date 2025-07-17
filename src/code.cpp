@@ -1,0 +1,73 @@
+#include <cpp11.hpp>
+#include "blosc.h"
+
+using namespace cpp11;
+
+[[cpp11::register]]
+std::string blosc_version() {
+  return std::string(BLOSC_VERSION_STRING);
+}
+
+[[cpp11::register]]
+int nthreads() {
+  return blosc_get_nthreads();
+}
+
+raws blosc_compress_internal(uint8_t *p, R_xlen_t s, std::string compressor,
+                             int level, int doshuffle, int typesize) {
+  writable::raws result(s + BLOSC_MAX_OVERHEAD);
+  uint8_t *dest = (uint8_t *)(RAW(as_sexp(result)));
+  int out = blosc_compress_ctx(level, doshuffle, typesize, s, p, dest, result.size(),
+                               compressor.c_str(), 0, 1);
+  if (out < 0) stop("BLOSC compressor failed!");
+  result.resize(out);
+  return result;
+}
+
+[[cpp11::register]]
+raws blosc_compress_dat(raws data, std::string compressor, int level, int doshuffle,
+                    int typesize) {
+  uint8_t *src = (uint8_t *)(RAW(as_sexp(data)));
+  return blosc_compress_internal(src, (R_xlen_t)data.size(), compressor,
+                                 level, doshuffle, typesize);
+}
+
+[[cpp11::register]]
+raws blosc_compress_con(SEXP con, std::string compressor, int level, int doshuffle,
+                        int typesize) {
+  stop("Not yet implemented for connections");
+  //TODO
+  return writable::raws((R_xlen_t)0);
+}
+
+[[cpp11::register]]
+raws blosc_decompress(raws data) {
+  uint8_t *src = (uint8_t *)(RAW(as_sexp(data)));
+  size_t decomp_size = 0;
+  int validate = blosc_cbuffer_validate(src, data.size(), &decomp_size);
+  if (validate < 0) stop("Unable to decompress data");
+  writable::raws result((R_xlen_t)decomp_size);
+  uint8_t *dest = (uint8_t *)(RAW(as_sexp(result)));
+  
+  int test = blosc_decompress_ctx(src, dest, decomp_size, 1);
+  if (test < 0) stop("Failed to decompress data");
+  return result;
+}
+
+[[cpp11::register]]
+sexp dtype_to_r(raws data, std::string dtype, double na_value) {
+  if (dtype == "<f4") {
+    float *src = (float *)(RAW(as_sexp(data)));
+    size_t len = data.size()/sizeof(float);
+    writable::doubles d((R_xlen_t)len);
+    for (uint32_t i = 0; i < len; i++) {
+      double s = (double)src[i];
+      if (src[i] == (float)na_value) s = NA_REAL;
+      d[(int)i] = s;
+    }
+    return d;
+  } else {
+    stop("The 'dtype' '%s' is not implemented", dtype.c_str());
+  }
+  return R_NilValue;
+}

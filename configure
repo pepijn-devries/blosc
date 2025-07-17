@@ -1,0 +1,71 @@
+#!/usr/bin/env sh
+
+# A dressed down version of:
+# Anticonf (tm) script by Jeroen Ooms (2024)
+
+PKG_TEST_HEADER="<blosc.h>"
+
+# Library settings
+PKG_CONFIG_NAME="blosc"
+
+# Use pkg-config if available
+if [ `command -v pkg-config` ]; then
+  PKGCONFIG_CFLAGS=`pkg-config --cflags --silence-errors ${PKG_CONFIG_NAME}`
+  PKGCONFIG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME}`
+fi
+
+if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
+  echo "Found INCLUDE_DIR and/or LIB_DIR!"
+  PKG_CFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
+  PKG_LIBS="-L$LIB_DIR $PKG_LIBS"
+elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
+  echo "Found pkg-config cflags and libs!"
+  PKG_CFLAGS=${PKGCONFIG_CFLAGS}
+  PKG_LIBS=${PKGCONFIG_LIBS}
+else
+  echo "Did not find pkg-config cflags and libs, trying to guess them!"
+  find ./ -iname *blosc*
+  ls /opt/R/arm64/include
+  cpre=''
+  for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/arm64 opt/R/x86_64 /sw; do
+    if test -e "${pre}/include/blosc.h"; then
+      cpre=${pre}; break
+    fi
+  done
+  if test -n "${cpre}"; then
+    PKG_CFLAGS="-I${cpre}/include"
+    if test "${cpre}" = /usr; then
+      PKG_LIBS="-lblosc -llz4 -lzstd -lz"
+    else
+      PKG_LIBS="-L${cpre}/lib -lblosc -llz4 -lzstd -lz"
+    fi
+  fi
+fi
+
+# For debugging
+echo "Using PKG_CFLAGS=$PKG_CFLAGS"
+echo "Using PKG_LIBS=$PKG_LIBS"
+
+# Find compiler
+CXX=`${R_HOME}/bin/R CMD config CXX`
+CFLAGS=`${R_HOME}/bin/R CMD config CFLAGS`
+CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
+
+# Test configuration
+echo "#include $PKG_TEST_HEADER" | ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E -xc++ - >/dev/null 2>configure.log
+
+# Customize the error
+if [ $? -ne 0 ]; then
+  echo "--------------------------- [ANTICONF] --------------------------------"
+  echo "Could not find the required static library BLOSC"
+  echo "-------------------------- [ERROR MESSAGE] ---------------------------"
+  cat configure.log
+  echo "--------------------------------------------------------------------"
+  exit 1
+fi
+
+# Write to Makevars
+sed -e "s|@cflags@|$PKG_CFLAGS|" -e "s|@libs@|$PKG_LIBS|" src/Makevars.in > src/Makevars
+
+# Success
+exit 0
