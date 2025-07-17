@@ -10,7 +10,7 @@ PKG_DEB_NAME="libblosc-dev"
 PKG_RPM_NAME="blosc-devel"
 PKG_BREW_NAME="blosc"
 PKG_TEST_HEADER="<blosc.h>"
-PKG_LIBS="-lblosc"
+PKG_LIBS="-lblosc -llz4 -lzstd -lz"
 
 # Use pkg-config if available
 if [ `command -v pkg-config` ]; then
