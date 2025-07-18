@@ -1,9 +1,31 @@
-PKG_CPPFLAGS = -DR_NO_REMAP -DSTRICT_R_HEADERS
-PKG_LIBS = -lblosc -llz4 -lzstd -lz
+PKG_CONFIG ?= $(BINPREF)pkg-config
+BLOSC_LIBS := $(shell $(PKG_CONFIG) --libs blosc)
 
-all: winlibs
+ifneq ($(BLOSC_LIBS),)
+$(info using BLOSC from Rtools)
+BLOSC_CFLAGS := $(shell $(PKG_CONFIG) --cflags blosc)
+else
+RWINLIB = ../windows/blosc
+TARGET = lib$(subst gcc,,$(COMPILED_BY))$(R_ARCH)
+BLOSC_CFLAGS = -I$(RWINLIB)/include
+BLOSC_LIBS = -L$(RWINLIB)/$(TARGET) -L$(RWINLIB)/lib -llz4 -lzstd -lz
+endif
+
+PKG_CPPFLAGS = $(BLOSC_CFLAGS) -DSTRICT_R_HEADERS -DR_NO_REMAP
+PKG_LIBS = $(BLOSC_LIBS)
+
+
+#all: clean
+all: $(SHLIB)
+
+$(OBJECTS): $(RWINLIB)
+
+$(SHLIB): $(OBJECTS)
+
+$(RWINLIB):
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
 
 clean:
 	rm -f $(SHLIB) $(OBJECTS)
 
-.PHONY: all clean winlibs
+.PHONY: all clean

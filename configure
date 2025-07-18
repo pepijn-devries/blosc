@@ -10,7 +10,8 @@ PKG_DEB_NAME="libblosc-dev"
 PKG_RPM_NAME="blosc-devel"
 PKG_BREW_NAME="blosc"
 PKG_TEST_HEADER="<blosc.h>"
-PKG_LIBS="-lblosc -llz4 -lzstd -lz"
+PKG_LIBS="-lblosc"
+PKG_CFLAGS=""
 
 # Use pkg-config if available
 if [ `command -v pkg-config` ]; then
@@ -35,7 +36,7 @@ elif [ `uname` = "Darwin" ]; then
     PKG_LIBS="-L$BREWDIR/lib $PKG_LIBS"
   else
     # BLOSC is not available here!:
-    curl -sfL "https://autobrew.github.io/scripts/blosc" > autobrew
+    curl -sfL "https://raw.githubusercontent.com/pepijn-devries/scripts/refs/heads/master/c-blosc" > autobrew
     . ./autobrew
   fi
 fi
