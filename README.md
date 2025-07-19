@@ -59,12 +59,11 @@ hist(chunk_data)
 
 zarr_dims <-
   structure(zarray$chunks |> unlist(), names = zattrs$`_ARRAY_DIMENSIONS` |> unlist())
-if (zarray$order != "C") zarr_dims <- rev(zarr_dims)
+if (zarray$order == "C") zarr_dims <- rev(zarr_dims)
 
 ar <- array(chunk_data, dim = zarr_dims)
 
-## Plot first time and elevation slice:
-image(ar[1,1,,])
+image(ar[,,1,1])
 ```
 
 <img src="man/figures/README-example-2.png" width="100%" />

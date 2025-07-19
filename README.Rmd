@@ -32,7 +32,7 @@ pak::pak("pepijn-devries/blosc")
 ## Example
 
 TODO
-```{r example, fig.width=4, fig.height=3}
+```{r example, fig.width=3, fig.height=3}
 chunk_dat <-
   "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/8.0.99.137" |>
   httr2::request() |>
@@ -62,11 +62,10 @@ hist(chunk_data)
 
 zarr_dims <-
   structure(zarray$chunks |> unlist(), names = zattrs$`_ARRAY_DIMENSIONS` |> unlist())
-if (zarray$order != "C") zarr_dims <- rev(zarr_dims)
+if (zarray$order == "C") zarr_dims <- rev(zarr_dims)
 
 ar <- array(chunk_data, dim = zarr_dims)
 
-## Plot first time and elevation slice:
-image(ar[1,1,,])
+image(ar[,,1,1])
 
 ```
