@@ -12,6 +12,4 @@ Suggests:
     httr2
 LinkingTo:
     cpp11
-SystemRequirements:
-    blosc:
-        blosc-devel (rpm) or libblosc-dev (deb).
+SystemRequirements: blosc: blosc-devel (rpm) or libblosc-dev (deb)
