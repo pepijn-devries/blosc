@@ -63,7 +63,16 @@ if (zarray$order == "C") zarr_dims <- rev(zarr_dims)
 
 ar <- array(chunk_data, dim = zarr_dims)
 
+## plot spatial slice at first timestamp
 image(ar[,,1,1])
 ```
 
 <img src="man/figures/README-example-2.png" width="100%" />
+
+``` r
+
+## plot time-series
+plot(ar[1,1,1,], type = "l")
+```
+
+<img src="man/figures/README-example-3.png" width="100%" />
