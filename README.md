@@ -42,9 +42,29 @@ zarray <-
   httr2::req_perform() |>
   httr2::resp_body_json(check_type = FALSE)
 
+zattrs <-
+  "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/.zattrs" |>
+  httr2::request() |>
+  httr2::req_perform() |>
+  httr2::resp_body_json(check_type = FALSE)
+
 ## decode zarr dtype to R types
 chunk_data <- blosc:::dtype_to_r(chunk_decomp, "<f4", zarray$fill_value)
 hist(chunk_data)
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
+
+``` r
+
+zarr_dims <-
+  structure(zarray$chunks |> unlist(), names = zattrs$`_ARRAY_DIMENSIONS` |> unlist())
+if (zarray$order != "C") zarr_dims <- rev(zarr_dims)
+
+ar <- array(chunk_data, dim = zarr_dims)
+
+## Plot first time and elevation slice:
+image(ar[1,1,,])
+```
+
+<img src="man/figures/README-example-2.png" width="100%" />
