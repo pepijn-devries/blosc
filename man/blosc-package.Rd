@@ -4,12 +4,12 @@
 \name{blosc-package}
 \alias{blosc}
 \alias{blosc-package}
-\title{blosc: What the Package Does (One Line, Title Case)}
+\title{blosc: Compress and Decompress Data Using the BLOSC Library}
 \description{
-What the package does (one paragraph).
+TODO.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Pepijn de Vries \email{pepijn.devries@outlook.com} (\href{https://orcid.org/0000-0002-7961-6646}{ORCID})
 
 }
 \keyword{internal}

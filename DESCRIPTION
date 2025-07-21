@@ -1,9 +1,11 @@
 Package: blosc
-Title: What the Package Does (One Line, Title Case)
+Title: Compress and Decompress Data Using the BLOSC Library
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Pepijn", "de Vries", role = c("aut", "cre"),
+      email = "pepijn.devries@outlook.com",
+      comment = c(ORCID = "0000-0002-7961-6646"))
+Description: TODO.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
