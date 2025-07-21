@@ -1,9 +1,0 @@
-# Used on rtools43 and up.
-# Remove illegal '-mwindows flag from libs (bug in rtools)
-PKG_LIBS = $(subst -mwindows,,$(shell pkg-config --libs blosc))
-PKG_CFLAGS = -DR_NO_REMAP -DSTRICT_R_HEADERS
-
-# Fallback for older rtools without blosc
-ifeq (,$(PKG_LIBS))
-  include Makevars.win
-endif
