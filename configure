@@ -30,7 +30,7 @@ elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   PKG_LIBS=${PKGCONFIG_LIBS}
 elif [ `uname` = "Darwin" ]; then
   echo "Attempt to run 'install.libs'"
-  ls ${R_HOME}
+  ls ${R_HOME}/bin/R
   ${R_HOME}/bin/R/Rscript ../tools/macos.R
 fi
 
