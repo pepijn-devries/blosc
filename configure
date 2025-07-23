@@ -30,12 +30,12 @@ elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   PKG_LIBS=${PKGCONFIG_LIBS}
 elif [ `uname` = "Darwin" ]; then
   echo "Attempt to run 'install.libs'"
-  ${R_HOME}/bin/Rscript tools/macos.R
+  ${R_HOME}/bin/Rscript -e tools/macos.R
 fi
 
 
 # For debugging
-echo "Using PKG_CFLAGS=$PKG_CFLAGS"
+echo "Using PKG_CFLAG S=$PKG_CFLAGS"
 echo "Using PKG_LIBS=$PKG_LIBS"
 
 # Find compiler
