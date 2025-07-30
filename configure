@@ -24,8 +24,6 @@ elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   PKG_LIBS=${PKGCONFIG_LIBS}
 else
   echo "Did not find pkg-config cflags and libs, trying to guess them!"
-  find ./ -iname *blosc*
-  ls /opt/R/arm64/include
   cpre=''
   for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/arm64 opt/R/x86_64 /sw; do
     if test -e "${pre}/include/blosc.h"; then
