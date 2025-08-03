@@ -12,14 +12,14 @@ blosc_compress_dat <- function(data, compressor, level, doshuffle, typesize) {
   .Call(`_blosc_blosc_compress_dat`, data, compressor, level, doshuffle, typesize)
 }
 
-blosc_compress_con <- function(con, compressor, level, doshuffle, typesize) {
-  .Call(`_blosc_blosc_compress_con`, con, compressor, level, doshuffle, typesize)
+blosc_decompress_dat <- function(data) {
+  .Call(`_blosc_blosc_decompress_dat`, data)
 }
 
-blosc_decompress <- function(data) {
-  .Call(`_blosc_blosc_decompress`, data)
+dtype_to_r_ <- function(data, dtype, na_value) {
+  .Call(`_blosc_dtype_to_r_`, data, dtype, na_value)
 }
 
-dtype_to_r <- function(data, dtype, na_value) {
-  .Call(`_blosc_dtype_to_r`, data, dtype, na_value)
+r_to_dtype_ <- function(data, dtype, na_value) {
+  .Call(`_blosc_r_to_dtype_`, data, dtype, na_value)
 }

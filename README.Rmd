@@ -1,4 +1,4 @@
----
+`---
 output: github_document
 ---
 
@@ -37,9 +37,7 @@ library(blosc)
 
 chunk_dat <-
   "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/8.0.99.137" |>
-  httr2::request() |>
-  httr2::req_perform() |>
-  httr2::resp_body_raw()
+  readBin("raw", 10L * 1024L * 1024L)
 
 ## decompress downloaded data:
 chunk_decomp <- blosc:::blosc_decompress(chunk_dat)

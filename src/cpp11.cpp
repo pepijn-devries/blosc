@@ -5,57 +5,57 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
-// code.cpp
+// compress.cpp
 std::string blosc_version();
 extern "C" SEXP _blosc_blosc_version() {
   BEGIN_CPP11
     return cpp11::as_sexp(blosc_version());
   END_CPP11
 }
-// code.cpp
+// compress.cpp
 int nthreads();
 extern "C" SEXP _blosc_nthreads() {
   BEGIN_CPP11
     return cpp11::as_sexp(nthreads());
   END_CPP11
 }
-// code.cpp
+// compress.cpp
 raws blosc_compress_dat(raws data, std::string compressor, int level, int doshuffle, int typesize);
 extern "C" SEXP _blosc_blosc_compress_dat(SEXP data, SEXP compressor, SEXP level, SEXP doshuffle, SEXP typesize) {
   BEGIN_CPP11
     return cpp11::as_sexp(blosc_compress_dat(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(compressor), cpp11::as_cpp<cpp11::decay_t<int>>(level), cpp11::as_cpp<cpp11::decay_t<int>>(doshuffle), cpp11::as_cpp<cpp11::decay_t<int>>(typesize)));
   END_CPP11
 }
-// code.cpp
-raws blosc_compress_con(SEXP con, std::string compressor, int level, int doshuffle, int typesize);
-extern "C" SEXP _blosc_blosc_compress_con(SEXP con, SEXP compressor, SEXP level, SEXP doshuffle, SEXP typesize) {
+// compress.cpp
+raws blosc_decompress_dat(raws data);
+extern "C" SEXP _blosc_blosc_decompress_dat(SEXP data) {
   BEGIN_CPP11
-    return cpp11::as_sexp(blosc_compress_con(cpp11::as_cpp<cpp11::decay_t<SEXP>>(con), cpp11::as_cpp<cpp11::decay_t<std::string>>(compressor), cpp11::as_cpp<cpp11::decay_t<int>>(level), cpp11::as_cpp<cpp11::decay_t<int>>(doshuffle), cpp11::as_cpp<cpp11::decay_t<int>>(typesize)));
+    return cpp11::as_sexp(blosc_decompress_dat(cpp11::as_cpp<cpp11::decay_t<raws>>(data)));
   END_CPP11
 }
-// code.cpp
-raws blosc_decompress(raws data);
-extern "C" SEXP _blosc_blosc_decompress(SEXP data) {
+// dtype.cpp
+sexp dtype_to_r_(raws data, std::string dtype, double na_value);
+extern "C" SEXP _blosc_dtype_to_r_(SEXP data, SEXP dtype, SEXP na_value) {
   BEGIN_CPP11
-    return cpp11::as_sexp(blosc_decompress(cpp11::as_cpp<cpp11::decay_t<raws>>(data)));
+    return cpp11::as_sexp(dtype_to_r_(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<double>>(na_value)));
   END_CPP11
 }
-// code.cpp
-sexp dtype_to_r(raws data, std::string dtype, double na_value);
-extern "C" SEXP _blosc_dtype_to_r(SEXP data, SEXP dtype, SEXP na_value) {
+// dtype.cpp
+raws r_to_dtype_(sexp data, std::string dtype, sexp na_value);
+extern "C" SEXP _blosc_r_to_dtype_(SEXP data, SEXP dtype, SEXP na_value) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dtype_to_r(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<double>>(na_value)));
+    return cpp11::as_sexp(r_to_dtype_(cpp11::as_cpp<cpp11::decay_t<sexp>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<sexp>>(na_value)));
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_blosc_blosc_compress_con", (DL_FUNC) &_blosc_blosc_compress_con, 5},
-    {"_blosc_blosc_compress_dat", (DL_FUNC) &_blosc_blosc_compress_dat, 5},
-    {"_blosc_blosc_decompress",   (DL_FUNC) &_blosc_blosc_decompress,   1},
-    {"_blosc_blosc_version",      (DL_FUNC) &_blosc_blosc_version,      0},
-    {"_blosc_dtype_to_r",         (DL_FUNC) &_blosc_dtype_to_r,         3},
-    {"_blosc_nthreads",           (DL_FUNC) &_blosc_nthreads,           0},
+    {"_blosc_blosc_compress_dat",   (DL_FUNC) &_blosc_blosc_compress_dat,   5},
+    {"_blosc_blosc_decompress_dat", (DL_FUNC) &_blosc_blosc_decompress_dat, 1},
+    {"_blosc_blosc_version",        (DL_FUNC) &_blosc_blosc_version,        0},
+    {"_blosc_dtype_to_r_",          (DL_FUNC) &_blosc_dtype_to_r_,          3},
+    {"_blosc_nthreads",             (DL_FUNC) &_blosc_nthreads,             0},
+    {"_blosc_r_to_dtype_",          (DL_FUNC) &_blosc_r_to_dtype_,          3},
     {NULL, NULL, 0}
 };
 }

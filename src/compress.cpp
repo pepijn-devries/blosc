@@ -33,15 +33,7 @@ raws blosc_compress_dat(raws data, std::string compressor, int level, int doshuf
 }
 
 [[cpp11::register]]
-raws blosc_compress_con(SEXP con, std::string compressor, int level, int doshuffle,
-                        int typesize) {
-  stop("Not yet implemented for connections");
-  //TODO
-  return writable::raws((R_xlen_t)0);
-}
-
-[[cpp11::register]]
-raws blosc_decompress(raws data) {
+raws blosc_decompress_dat(raws data) {
   uint8_t *src = (uint8_t *)(RAW(as_sexp(data)));
   size_t decomp_size = 0;
   int validate = blosc_cbuffer_validate(src, data.size(), &decomp_size);
@@ -52,22 +44,4 @@ raws blosc_decompress(raws data) {
   int test = blosc_decompress_ctx(src, dest, decomp_size, 1);
   if (test < 0) stop("Failed to decompress data");
   return result;
-}
-
-[[cpp11::register]]
-sexp dtype_to_r(raws data, std::string dtype, double na_value) {
-  if (dtype == "<f4") {
-    float *src = (float *)(RAW(as_sexp(data)));
-    size_t len = data.size()/sizeof(float);
-    writable::doubles d((R_xlen_t)len);
-    for (uint32_t i = 0; i < len; i++) {
-      double s = (double)src[i];
-      if (src[i] == (float)na_value) s = NA_REAL;
-      d[(int)i] = s;
-    }
-    return d;
-  } else {
-    stop("The 'dtype' '%s' is not implemented", dtype.c_str());
-  }
-  return R_NilValue;
 }

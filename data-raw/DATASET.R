@@ -1,0 +1,58 @@
+## This script generates different raw data types for testing
+## It uses the Python numpy package to generate the data
+## types and stores it in a data.frame for testing
+library(reticulate)
+library(dplyr)
+
+## Test if the Python environment exists. If not create it
+if (!"py_env" %in% list.dirs(Sys.getenv("RETICULATE_VIRTUALENV_ROOT"),
+                            full.names = FALSE, recursive = FALSE)) {
+  ## install Python (could be skipped if Python is already installed):
+  install_python()
+  ## Set up virtual environment with Python:
+  virtualenv_create(envname = "py_env")
+  ## Install the required Python package:
+  virtualenv_install("py_env", packages = c("numpy"))
+}
+
+use_virtualenv("py_env")
+
+data_types <-
+  dplyr::tibble(
+  string_representation =
+    c("-127, 128, 129",
+      "-127, 128, 129",
+      "-1.43e-9, -9871., -12.",
+      "-1.43e-9, -9871., -12.",
+      "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
+      "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
+      "0, 1"),
+  dtype = c(">i4", "<i4", ">f8", "<f8", ">c16", "<c16", "|b1")
+)
+
+dtypes <-
+  py_run_string(
+    paste(
+      c(
+        "import numpy as np",
+        sprintf("%s = np.array([%s], dtype=\"%s\")",
+                letters[seq_len(nrow(data_types))],
+                data_types$string_representation,
+                data_types$dtype)),
+      collapse = "\n"
+    ),
+    convert = FALSE
+)
+
+data_types <-
+  dplyr::bind_cols(
+    data_types,
+    dplyr::tibble(
+      raw_representation = lapply(letters[1:7], \(i) dtypes[[i]]$tobytes() |> as.raw()),
+      r_representation   = lapply(letters[1:7], \(i) dtypes[[i]] |> py_to_r())
+    )
+  )
+
+save(data_types,
+     file = file.path(testthat::test_path(), "testdata", "testdata.rdata"),
+     compress = TRUE)
