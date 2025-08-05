@@ -65,7 +65,6 @@ blosc_dtype prepare_dtype(std::string dtype) {
     if (bz > 255) stop("Invalid byte size");
     dt.byte_size = (uint8_t)bz;
     
-    // In r a complex number is a type consisting of two doubles (r(eal) and i(maginary))
     if (dt.main_type == 'b' && dt.byte_size != 1)
       stop("Unknown data type '%s'", dtype.c_str());
     if ((dt.main_type == 'i' || dt.main_type == 'f' || dt.main_type == 'u') &&
@@ -132,8 +131,20 @@ void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype, uint8_t *
         stop("Failed to convert data");
       }
     } else if (rtype == CPLXSXP) {
-      //TODO
-      stop("TODO not implemented");
+      if (dtype.main_type == 'c') {
+        if (dtype.byte_size == 8) {
+          // In R a complex number is a type consisting of two doubles (r(eal) and i(maginary))
+          conv.c8.real      = (float)((double *)input)[2*i];
+          conv.c8.imaginary = (float)((double *)input)[2*i + 1];
+        } else if (dtype.byte_size == 16) {
+          conv.c16.real      = ((double *)input)[2*i];
+          conv.c16.imaginary = ((double *)input)[2*i + 1];
+        } else {
+          stop("Failed to convert data");
+        }
+      } else {
+        stop("Failed to convert data");
+      }
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
@@ -168,7 +179,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   } else if(dt.main_type == 'f' && dt.byte_size <= 8) {
     data = Rf_coerceVector(data, REALSXP);
     ptr_in = (uint8_t *)REAL(data);
-  } else if(dt.main_type == 'c' && dt.byte_size <= 8) {
+  } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
     data = Rf_coerceVector(data, CPLXSXP);
     ptr_in = (uint8_t *)COMPLEX(data);
   } else {
