@@ -27,7 +27,7 @@ TODO description
 \examples{
 r_to_dtype(1:100, "<i4")
 r_to_dtype(c(TRUE, FALSE), "|b1")
-dtype_to_r(as.raw(0:1), "|b1") #TODO implement
+# dtype_to_r(as.raw(0:1), "|b1") #TODO implement
 }
 \author{
 Pepijn de Vries

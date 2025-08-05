@@ -11,7 +11,7 @@
 #' @examples
 #' r_to_dtype(1:100, "<i4")
 #' r_to_dtype(c(TRUE, FALSE), "|b1")
-#' dtype_to_r(as.raw(0:1), "|b1") #TODO implement
+#' # dtype_to_r(as.raw(0:1), "|b1") #TODO implement
 #' @export
 r_to_dtype <- function(x, dtype, na_value = NA, ...) {
   r_to_dtype_(x, dtype, na_value)
