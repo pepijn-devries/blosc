@@ -25,13 +25,15 @@
 #' decompressed `raw` data. Or in in case `dtype` (see `dtype_to_r()`) is
 #' specified, a vector of the specified type is returned.
 #' @examples
-#' my_dat        <- as.raw(sample.int(255, 10*1024, replace = TRUE))
-#' my_dat_out    <- blosc_compress(my_dat)
+#' my_dat        <- as.raw(sample.int(2L, 10L*1024L, replace = TRUE) - 1L)
+#' my_dat_out    <- blosc_compress(my_dat, typesize = 1L)
 #' my_dat_decomp <- blosc_decompress(my_dat_out)
 #' 
+#' ## After compressing and decompressing the data is the same as the original:
+#' all(my_dat == my_dat_decomp)
 #' @rdname blosc
 #' @export
-blosc_compress <- function(x, compressor = "lz4", level = 7L,
+blosc_compress <- function(x, compressor = "blosclz", level = 7L,
                            shuffle = "noshuffle", typesize = 4L, ...) {
   compressor_args <- c("blosclz", "lz4", "lz4hc", "zlib", "zstd")
   compressor <- match.arg(compressor, compressor_args)

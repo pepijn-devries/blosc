@@ -7,7 +7,7 @@
 \usage{
 blosc_compress(
   x,
-  compressor = "lz4",
+  compressor = "blosclz",
   level = 7L,
   shuffle = "noshuffle",
   typesize = 4L,
@@ -52,8 +52,10 @@ specified, a vector of the specified type is returned.
 Use the Blosc library to compress or decompress data.
 }
 \examples{
-my_dat        <- as.raw(sample.int(255, 10*1024, replace = TRUE))
-my_dat_out    <- blosc_compress(my_dat)
+my_dat        <- as.raw(sample.int(2L, 10L*1024L, replace = TRUE) - 1L)
+my_dat_out    <- blosc_compress(my_dat, typesize = 1L)
 my_dat_decomp <- blosc_decompress(my_dat_out)
 
+## After compressing and decompressing the data is the same as the original:
+all(my_dat == my_dat_decomp)
 }
