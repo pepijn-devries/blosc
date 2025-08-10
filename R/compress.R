@@ -55,6 +55,10 @@ blosc_compress <- function(x, compressor = "blosclz", level = 7L,
 #' @export
 #' @rdname blosc
 blosc_decompress <- function(x, ...) {
-  blosc_decompress_dat(x)
-  #TODO convert to specific type if dtype is specified
+  
+  result <- blosc_decompress_dat(x)
+  args <- list(x = result, ...)
+  if (any(names(args) %in% "dtype"))
+    result <- do.call(dtype_to_r, args)
+  return(result)
 }

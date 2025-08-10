@@ -22,12 +22,16 @@ data_types <-
   string_representation =
     c("-127, 128, 129",
       "-127, 128, 129",
-      "-1.43e-9, -9871., -12.",
-      "-1.43e-9, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
+      "-1.43e-6, -9871., -12.",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
       "0, 1"),
-  dtype = c(">i4", "<i4", ">f8", "<f8", ">c16", "<c16", "|b1")
+  dtype = c(">i4", "<i4", ">f2", "<f2", ">f4", "<f4", ">f8", "<f8", ">c16", "<c16", "|b1")
 )
 
 dtypes <-
@@ -48,8 +52,10 @@ data_types <-
   dplyr::bind_cols(
     data_types,
     dplyr::tibble(
-      raw_representation = lapply(letters[1:7], \(i) dtypes[[i]]$tobytes() |> as.raw()),
-      r_representation   = lapply(letters[1:7], \(i) dtypes[[i]] |> py_to_r())
+      raw_representation = lapply(letters[seq_len(nrow(data_types))],
+                                  \(i) dtypes[[i]]$tobytes() |> as.raw()),
+      r_representation   = lapply(letters[seq_len(nrow(data_types))],
+                                  \(i) dtypes[[i]] |> py_to_r())
     )
   )
 

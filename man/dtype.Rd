@@ -3,14 +3,14 @@
 \name{r_to_dtype}
 \alias{r_to_dtype}
 \alias{dtype_to_r}
-\title{Convert from or to ZARR dtypes}
+\title{Convert from or to ZARR data types}
 \usage{
 r_to_dtype(x, dtype, na_value = NA, ...)
 
 dtype_to_r(x, dtype, na_value = NA, ...)
 }
 \arguments{
-\item{x}{TODO}
+\item{x}{Object to be converted}
 
 \item{dtype}{TODO}
 
@@ -19,15 +19,35 @@ dtype_to_r(x, dtype, na_value = NA, ...)
 \item{...}{Ignored}
 }
 \value{
-TODO
+In case of \code{r_to_dtype()} a vector of encoded \code{raw} data is returned.
+In case of \code{dtype_to_r()} a vector of an R type (appropriate for the specified \code{dtype})
+is returned if possible.
 }
 \description{
-TODO description
+Use \href{https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html}{ZARR V2.0} data types to
+convert between R native types and raw data.
+}
+\details{
+One of the applications of BLOSC compression is in ZARR, which is used to store
+n-dimensional structured data. \code{r_to_dtype()} and \code{dtype_to_r()} are convenience functions
+that allows you to convert most common data types to R native types.
+
+R natively only supports \code{\link[=logical]{logical()}} (actually stored as 32 bit integer in memory),
+\code{\link[=integer]{integer()}} (signed 32 bit integers), \code{\link[=numeric]{numeric()}} (64 bit floating points) and \code{\link[=complex]{complex()}}
+(real and imaginary component both represented by a 64 bit floating point). R also has some
+more complex classes, but those are generally derivatives of the aforementioned types.
+
+The functions documented here will attempt to convert raw data to R types (or vice versa).
+As not all 'dtypes' have an appropriate R type counterpart, some conversions will not
+be possible directly and will result in an error.
 }
 \examples{
+## TODO include better examples
 r_to_dtype(1:100, "<i4")
+
 r_to_dtype(c(TRUE, FALSE), "|b1")
-# dtype_to_r(as.raw(0:1), "|b1") #TODO implement
+dtype_to_r(as.raw(0:1), "|b1")
+dtype_to_r(as.raw(0:20), "|i1")
 }
 \author{
 Pepijn de Vries
