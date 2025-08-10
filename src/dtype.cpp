@@ -97,7 +97,7 @@ sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
   cempty.imaginary = 0.0;
   empty.c16 = cempty;
   conv = empty;
-  int n = data.size() / dt.byte_size;
+  int n = data.size() / dt.byte_size, mult_factor = 1;
   uint8_t *src;
   if (dt.needs_byteswap) {
     writable::raws data_copy(data.size());
@@ -131,10 +131,9 @@ sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
     result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
-    stop ("TODO writable::complex does not exist yet");
-    //SET_COMPLEX_ELT()
-    result = Rf_allocVector(CPLXSXP, (R_xlen_t)n);
-    dest = (uint8_t *)COMPLEX(result);
+    mult_factor = 2;
+    result = writable::doubles((R_xlen_t) 2 * n);
+    dest = (uint8_t *)REAL(result);
   } else {
     stop("Cannot convert data type to an R type");
   }
@@ -143,18 +142,25 @@ sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
     out_size = sizeof(int);
   } else if (TYPEOF(result) == REALSXP) {
     out_size = sizeof(double);
-  } else if (TYPEOF(result) == CPLXSXP) {
-    out_size = sizeof(Rcomplex);
   } else {
     stop("Conversion not implemented");
   }
   
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < mult_factor * n; i++) {
     conv = empty;
-    memcpy(&conv, src + i * dt.byte_size, dt.byte_size);
+    memcpy(&conv, src + i * dt.byte_size / mult_factor, dt.byte_size / mult_factor);
     convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size);
   }
   
+  if (dt.main_type == 'c') {
+    // in case of 'c' convert doubles to complex vector
+    // This could be simplified once `cpp11` implements Rcomplex vectors
+    sexp c = PROTECT(Rf_allocVector(CPLXSXP, n));
+    uint8_t * cptr = (uint8_t *)COMPLEX(c);
+    memcpy(cptr, dest, n * sizeof(Rcomplex));
+    UNPROTECT(1);
+    return c;
+  }
   return result;
 }
 
@@ -199,12 +205,16 @@ void convert_data_inv(conversion_t *input, blosc_dtype dtype, int rtype, uint8_t
       d = (double)(*input).f4;
     } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
       d = (*input).f8;
+    } else if (dtype.main_type == 'c' && dtype.byte_size == 8) {
+      d = (double)(*input).f4;
+    } else if (dtype.main_type == 'c' && dtype.byte_size == 16) {
+      d = (*input).f8;
     } else {
       stop("Conversion not implemented");
     }
     memcpy(output, &d, sizeof(double));
   } else if (rtype == CPLXSXP) {
-    stop("TODO");
+    stop("This type should not occure as it is coded as REALs at this stage");
   } else {
     stop("Conversion method not available");
   }
