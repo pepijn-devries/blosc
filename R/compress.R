@@ -35,21 +35,28 @@
 #' @export
 blosc_compress <- function(x, compressor = "blosclz", level = 7L,
                            shuffle = "noshuffle", typesize = 4L, ...) {
+  
+  typesize <- as.integer(typesize)
+  if (typesize < 1L || typesize > 255L)
+    stop("Argument 'typesize' out of range (1-255)")
+  
+  if (!inherits(x, "raw")) {
+    dt <- dtype_to_list_(...)
+    if (dt$byte_size != typesize)
+      stop("Specified `dtype` does not match with provided `typesize`")
+    x <- r_to_dtype(x, ...)
+  } 
+  
   compressor_args <- c("blosclz", "lz4", "lz4hc", "zlib", "zstd")
   compressor <- match.arg(compressor, compressor_args)
   
   shuffle_args <- c("noshuffle", "shuffle", "bitshuffle")
   shuffle <- match.arg(shuffle, shuffle_args)
   shuffle <- match(shuffle, shuffle_args) - 1
-  typesize <- as.integer(typesize)
-  if (typesize < 1L || typesize > 255L)
-    stop("Argument 'typesize' out of range (1-255)")
-  # TODO check if type size matches dtype
   level <- as.integer(level)
   if (level < 0L || level > 9L)
     stop("Compression level should be between 0 (no compression) and 9 (max compression)")
   
-  if (!inherits(x, "raw")) x <- r_to_dtype(x, ...)
   blosc_compress_dat(x, compressor, level, shuffle, typesize)
 }
 

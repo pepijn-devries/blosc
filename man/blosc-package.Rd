@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-TODO.
+Blosc is a blocking, shuffling and lossless compression algorithm. It is often used to compress n-dimensional structured array data. It is applied (amongst others) in the geo-spatial zarr file format. This package can be used to decompress such data or to compress data.
 }
 \author{
 \strong{Maintainer}: Pepijn de Vries \email{pepijn.devries@outlook.com} (\href{https://orcid.org/0000-0002-7961-6646}{ORCID})

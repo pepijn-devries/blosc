@@ -12,9 +12,30 @@ dtype_to_r(x, dtype, na_value = NA, ...)
 \arguments{
 \item{x}{Object to be converted}
 
-\item{dtype}{TODO}
+\item{dtype}{The data type used for encoding/decoding raw data. The \code{dtype} is
+a code consisting of at least 3 characters. The first character indicates the
+\href{https://en.wikipedia.org/wiki/Endianness}{endianness} of the data: \code{'<'}
+(little-endian), \code{'>'} (big-endian), or \code{'|'} (endianness not relevant).
 
-\item{na_value}{TODO}
+The second character represents the main data type (\code{'b'} boolean (logical),
+\code{'i'} signed integer, \code{'u'} unsigned integer, \code{'f'} floating point number,
+\code{'c'} complex number).
+
+The final characters are numerical indicating the byte size of the data type.
+For example: \code{dtype = "<f4"} means a 32 bit floating point number; \code{dtype = "|b1"}
+means an 8 bit logical value.
+
+For more details about dtypes see
+\href{https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html}{ZARR V2.0}}
+
+\item{na_value}{When storing raw data, you may want to reserve a value to
+represent missing values. This is also what \code{R} does for \code{NA} values.
+Other software may use different values to represent missing values. Also,
+some data types have insufficient storage capacity to store \code{R} \code{NA} values.
+
+Therefore, you can use this argument to indicate which value should represent
+missing values. By default it uses \code{R} \code{NA}. When set to \code{NULL}, missing values
+are just processed as is, without any further notice or warning.}
 
 \item{...}{Ignored}
 }
@@ -42,12 +63,19 @@ As not all 'dtypes' have an appropriate R type counterpart, some conversions wil
 be possible directly and will result in an error.
 }
 \examples{
-## TODO include better examples
-r_to_dtype(1:100, "<i4")
+## Encode volcano data to 16 bit floating point values
+volcano_encoded <-
+  r_to_dtype(volcano, dtype = "<f2")
 
-r_to_dtype(c(TRUE, FALSE), "|b1")
-dtype_to_r(as.raw(0:1), "|b1")
-dtype_to_r(as.raw(0:20), "|i1")
+## Decode the volcano format to its original
+volcano_reconstructed <-
+  dtype_to_r(volcano_encoded, dtype = "<f2")
+
+## The reconstruction is the same as its original:
+all(volcano_reconstructed == volcano)
+
+## Encode a numeric sequence with a missing value represented by -999
+r_to_dtype(c(1, 2, 3, NA, 4), dtype = "<i2", na_value = -999)
 }
 \author{
 Pepijn de Vries

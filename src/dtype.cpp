@@ -40,7 +40,7 @@ union conversion_t {
 
 void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype,
                   uint8_t *output, sexp na_value);
-void convert_data_inv(conversion_t *input, blosc_dtype dtype,
+bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value);
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n);
 
@@ -86,6 +86,17 @@ blosc_dtype prepare_dtype(std::string dtype) {
       stop("Unknown data type '%s'", dtype.c_str());
     
     return dt;
+}
+
+[[cpp11::register]]
+list dtype_to_list_(std::string dtype) {
+  blosc_dtype dt = prepare_dtype(dtype);
+  writable::list result({
+    "byte_size"_nm = writable::integers({ dt.byte_size}),
+      "needs_byteswap"_nm = writable::logicals({dt.needs_byteswap}),
+      "main_type"_nm = writable::strings({std::string(1, dt.main_type)})
+  });
+  return result;
 }
 
 [[cpp11::register]]
@@ -148,10 +159,13 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     stop("Conversion not implemented");
   }
   
+  bool warn = false;
   for (int i = 0; i < mult_factor * n; i++) {
     conv = empty;
     memcpy(&conv, src + i * dt.byte_size / mult_factor, dt.byte_size / mult_factor);
-    convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, na_value);
+    bool should_warn =
+      convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, na_value);
+    if (should_warn) warn = true;
   }
   
   if (dt.main_type == 'c') {
@@ -163,29 +177,38 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     UNPROTECT(1);
     return c;
   }
+  if (warn) warning("Data contains values equal to R's NA representation");
   return result;
 }
 
 sexp check_na(sexp na_value, int rtype) {
+  sexp result;
   if (!Rf_isNull(na_value)) {
     if (!Rf_isVector(na_value)) stop("Invalid NA value");
     int rt = rtype;
     if (rtype == LGLSXP) rt = INTSXP;
-    na_value = Rf_coerceVector(na_value, rt);
-    if (LENGTH(na_value) != 1) stop("Invalid NA value");
+    result = Rf_coerceVector(na_value, rt);
+    if (LENGTH(result) != 1) stop("Invalid NA value");
   }
-  return na_value;
+  return result;
 }
 
-void convert_data_inv(conversion_t *input, blosc_dtype dtype,
+bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value) {
-  // bool ignore_na = Rf_isNull(na_value); TODO not used yet
+  bool ignore_na = Rf_isNull(na_value), warn_na = false;
   na_value = check_na(na_value, rtype);
   
   if (rtype == LGLSXP) {
     if (dtype.main_type == 'b' && dtype.byte_size == 1) {
       int b = (int)(*input).b1;
+      if (!ignore_na) {
+        int nval = INTEGER(na_value)[0];
+        if (nval != NA_INTEGER) nval = 0xff & nval;
+        if (b == NA_INTEGER && !ISNA(na_value)) warn_na = true;
+        if (b ==(0xff & INTEGER(na_value)[0])) b = NA_LOGICAL;
+      }
       memcpy(output, &b, sizeof(int));
+      
     } else {
       stop("Conversion not implemented");
     }
@@ -205,6 +228,11 @@ void convert_data_inv(conversion_t *input, blosc_dtype dtype,
       stop("Conversion not implemented");
     }
 
+    if (!ignore_na) {
+      int nval = INTEGER(na_value)[0];
+      if (i == NA_INTEGER && nval != NA_INTEGER) warn_na = true;
+      if (i == nval) i = NA_INTEGER;
+    }
     memcpy(output, &i, sizeof(int));
   } else if (rtype == REALSXP) {
     double d;
@@ -229,12 +257,20 @@ void convert_data_inv(conversion_t *input, blosc_dtype dtype,
     } else {
       stop("Conversion not implemented");
     }
+    
+    if (!ignore_na) {
+      double nval = REAL(na_value)[0];
+      if (R_IsNA(d) && !R_IsNA(nval)) warn_na = true;
+      if (d == nval) d = NA_REAL;
+    }
+    
     memcpy(output, &d, sizeof(double));
   } else if (rtype == CPLXSXP) {
     stop("This type should not occure as it is coded as REALs at this stage");
   } else {
     stop("Conversion method not available");
   }
+  return warn_na;
 }
 
 void convert_data(uint8_t *input, int rtype, int n,
@@ -404,7 +440,6 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
 }
 
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
-  warning("TODO Byte swapping need more testing");
   int bs = dtype.byte_size;
   uint32_t n2 = n;
   if (dtype.main_type == 'c') {

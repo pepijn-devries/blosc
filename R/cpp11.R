@@ -16,6 +16,10 @@ blosc_decompress_dat <- function(data) {
   .Call(`_blosc_blosc_decompress_dat`, data)
 }
 
+dtype_to_list_ <- function(dtype) {
+  .Call(`_blosc_dtype_to_list_`, dtype)
+}
+
 dtype_to_r_ <- function(data, dtype, na_value) {
   .Call(`_blosc_dtype_to_r_`, data, dtype, na_value)
 }
