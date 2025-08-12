@@ -1,13 +1,16 @@
 
-# BLOSC <img src="man/figures/logo.png" align="right" height="139" alt="" />
+# BLOSC <img src="man/figures/logo.png" align="right" height="139" alt="logo" />
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-*Status: experimental*. A package that ports BLOSC compressors and
-decompressors to R.
+[Blosc](https://www.blosc.org/) is a blocking, shuffling and lossless
+compression algorithm. It is often used to compress n-dimensional
+structured array data. It is applied (amongst others) in the geo-spatial
+[zarr](https://zarr.dev/) file format. This package ports BLOSC
+compressors and decompressors to R.
 
 ## Installation
 
