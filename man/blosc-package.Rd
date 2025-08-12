@@ -6,6 +6,8 @@
 \alias{blosc-package}
 \title{blosc: Compress and Decompress Data Using the BLOSC Library}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 TODO.
 }
 \author{

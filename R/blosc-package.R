@@ -1,5 +1,6 @@
 #' @keywords internal
 "_PACKAGE"
+NULL
 
 .onUnload <- function(libpath) library.dynam.unload("blosc", libpath)
 

@@ -44,6 +44,7 @@ blosc_compress <- function(x, compressor = "blosclz", level = 7L,
   typesize <- as.integer(typesize)
   if (typesize < 1L || typesize > 255L)
     stop("Argument 'typesize' out of range (1-255)")
+  # TODO check if type size matches dtype
   level <- as.integer(level)
   if (level < 0L || level > 9L)
     stop("Compression level should be between 0 (no compression) and 9 (max compression)")

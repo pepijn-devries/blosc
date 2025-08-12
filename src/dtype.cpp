@@ -38,8 +38,10 @@ union conversion_t {
   complex64 c16;
 };
 
-void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype, uint8_t *output);
-void convert_data_inv(conversion_t *input, blosc_dtype dtype, int rtype, uint8_t *output);
+void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype,
+                  uint8_t *output, sexp na_value);
+void convert_data_inv(conversion_t *input, blosc_dtype dtype,
+                      int rtype, uint8_t *output, sexp na_value);
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n);
 
 blosc_dtype prepare_dtype(std::string dtype) {
@@ -87,7 +89,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
 }
 
 [[cpp11::register]]
-sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
+sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   blosc_dtype dt = prepare_dtype(dtype);
   if (data.size() % dt.byte_size != 0)
     stop("Raw data size needs to be multitude of data type size");
@@ -149,7 +151,7 @@ sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
   for (int i = 0; i < mult_factor * n; i++) {
     conv = empty;
     memcpy(&conv, src + i * dt.byte_size / mult_factor, dt.byte_size / mult_factor);
-    convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size);
+    convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, na_value);
   }
   
   if (dt.main_type == 'c') {
@@ -164,7 +166,22 @@ sexp dtype_to_r_(raws data, std::string dtype, double na_value) {
   return result;
 }
 
-void convert_data_inv(conversion_t *input, blosc_dtype dtype, int rtype, uint8_t *output) {
+sexp check_na(sexp na_value, int rtype) {
+  if (!Rf_isNull(na_value)) {
+    if (!Rf_isVector(na_value)) stop("Invalid NA value");
+    int rt = rtype;
+    if (rtype == LGLSXP) rt = INTSXP;
+    na_value = Rf_coerceVector(na_value, rt);
+    if (LENGTH(na_value) != 1) stop("Invalid NA value");
+  }
+  return na_value;
+}
+
+void convert_data_inv(conversion_t *input, blosc_dtype dtype,
+                      int rtype, uint8_t *output, sexp na_value) {
+  // bool ignore_na = Rf_isNull(na_value); TODO not used yet
+  na_value = check_na(na_value, rtype);
+  
   if (rtype == LGLSXP) {
     if (dtype.main_type == 'b' && dtype.byte_size == 1) {
       int b = (int)(*input).b1;
@@ -220,7 +237,10 @@ void convert_data_inv(conversion_t *input, blosc_dtype dtype, int rtype, uint8_t
   }
 }
 
-void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype, uint8_t *output) {
+void convert_data(uint8_t *input, int rtype, int n,
+                  blosc_dtype dtype, uint8_t *output, sexp na_value) {
+  na_value = check_na(na_value, rtype);
+  bool warn_na = false, ignore_na = Rf_isNull(na_value);
   conversion_t empty, conv;
   complex64 cempty;
   cempty.real = 0.0;
@@ -230,38 +250,108 @@ void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype, uint8_t *
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
-        conv.b1 = (bool)((int *)input)[i];
+
+        if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
+          conv.i1 = 0xff & INTEGER(na_value)[0]; else
+            conv.b1 = (bool)((int *)input)[i];
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
+          warn_na = true;
+        
       } else {
         stop("Failed to convert data");
       }
     } else if (rtype == INTSXP) {
       if (dtype.main_type == 'i') {
-        conv.i8 = (int64_t)((int *)input)[i];
+        
+        if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
+          conv.i8 = (int64_t)INTEGER(na_value)[0]; else {
+            conv.i8 = (int64_t)((int *)input)[i];
+            if (!ignore_na && ((int *)input)[i] == INTEGER(na_value)[0])
+              warn_na = true;
+          }
+
       } else {
         stop("Failed to convert data");
       }
     } else if (rtype == REALSXP) {
       if (dtype.main_type == 'i') {
-        conv.i8 = (int64_t)((double *)input)[i];
+
+        if (!ignore_na && R_IsNA(((double *)input)[i]))
+          conv.i8 = (int64_t)REAL(na_value)[0]; else {
+            conv.i8 = (int64_t)((double *)input)[i];
+            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+              warn_na = true;
+          }
+          
       } else if (dtype.main_type == 'f' && dtype.byte_size == 2) {
-        float16 f = ((double *)input)[i];
+        
+        float16 f;
+        
+        if (!ignore_na && R_IsNA(((double *)input)[i]))
+          f = REAL(na_value)[0]; else {
+            f = ((double *)input)[i];
+            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+              warn_na = true;
+          }
+          
         conv.f2 = f.GetBits();
+
       } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
-        conv.f4 = (float)((double *)input)[i];
+
+        if (!ignore_na && R_IsNA(((double *)input)[i]))
+          conv.f4 = (float)REAL(na_value)[0]; else {
+            conv.f4 = (float)((double *)input)[i];
+            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+              warn_na = true;
+          }
+          
       } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
-        conv.f8 = ((double *)input)[i];
+
+        if (!ignore_na && R_IsNA(((double *)input)[i]))
+          conv.f8 = REAL(na_value)[0]; else {
+            conv.f8 = ((double *)input)[i];
+            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+              warn_na = true;
+          }
+          
       } else {
         stop("Failed to convert data");
       }
     } else if (rtype == CPLXSXP) {
       if (dtype.main_type == 'c') {
         if (dtype.byte_size == 8) {
+          
           // In R a complex number is a type consisting of two doubles (r(eal) and i(maginary))
-          conv.c8.real      = (float)((double *)input)[2*i];
-          conv.c8.imaginary = (float)((double *)input)[2*i + 1];
+          double re = ((double *)input)[2*i];
+          double im = ((double *)input)[2*i + 1];
+          Rcomplex c;
+          if (!ignore_na) c = COMPLEX(na_value)[0];
+          if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
+            conv.c8.real = (float)c.r;
+            conv.c8.imaginary = (float)c.i;
+          } else {
+            conv.c8.real      = (float)re;
+            conv.c8.imaginary = (float)im;
+            if (!ignore_na && re == c.r && im == c.i)
+                warn_na = true;
+          }
+          
         } else if (dtype.byte_size == 16) {
-          conv.c16.real      = ((double *)input)[2*i];
-          conv.c16.imaginary = ((double *)input)[2*i + 1];
+          
+          double re = ((double *)input)[2*i];
+          double im = ((double *)input)[2*i + 1];
+          Rcomplex c;
+          if (!ignore_na) c = COMPLEX(na_value)[0];
+          if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
+            conv.c16.real = c.r;
+            conv.c16.imaginary = c.i;
+          } else {
+            conv.c16.real      = re;
+            conv.c16.imaginary = im;
+            if (!ignore_na && re == c.r && im == c.i)
+              warn_na = true;
+          }
+          
         } else {
           stop("Failed to convert data");
         }
@@ -271,6 +361,7 @@ void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype, uint8_t *
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
+  if (warn_na) warning("Data contains values equal to the value representing missing values!");
 }
 
 [[cpp11::register]]
@@ -307,7 +398,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
   uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  convert_data(ptr_in, TYPEOF(data), n, dt, ptr);
+  convert_data(ptr_in, TYPEOF(data), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
   return result;
 }

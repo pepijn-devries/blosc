@@ -1,5 +1,5 @@
 
-# blosc
+# BLOSC <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- badges: start -->
 
@@ -19,61 +19,58 @@ You can install the development version of blosc from
 pak::pak("pepijn-devries/blosc")
 ```
 
+MacOS users may first need to install system requirements before
+installing the package using:
+
+``` r
+source("https://mac.R-project.org/bin/install.R")
+install.libs("blosc")
+```
+
 ## Example
 
-TODO
+The blosc package can be uesd to compress `raw` data, but also vectors
+of other data types. The example below shows how data from the volcano
+matrix can be compressed with blosc.
 
 ``` r
 library(blosc)
 
-chunk_dat <-
-  "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/8.0.99.137" |>
-  httr2::request() |>
-  httr2::req_perform() |>
-  httr2::resp_body_raw()
+volcano_compressed <-
+  blosc_compress(volcano, typesize = 2L, dtype = "<f2")
 
-## decompress downloaded data:
-chunk_decomp <- blosc:::blosc_decompress(chunk_dat)
-## recompress it:
-chunk_recomp <- blosc_compress(chunk_decomp)
-
-zarray <-
-  "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/.zarray" |>
-  httr2::request() |>
-  httr2::req_perform() |>
-  httr2::resp_body_json(check_type = FALSE)
-
-zattrs <-
-  "https://s3.waw3-1.cloudferro.com/mdl-arco-geo-014/arco/GLOBAL_ANALYSISFORECAST_PHY_001_024/cmems_mod_glo_phy_anfc_0.083deg_PT1H-m_202406/geoChunked.zarr/thetao/.zattrs" |>
-  httr2::request() |>
-  httr2::req_perform() |>
-  httr2::resp_body_json(check_type = FALSE)
-
-## decode zarr dtype to R types
-chunk_data <- blosc:::dtype_to_r(chunk_decomp, "<f4", zarray$fill_value)
-hist(chunk_data)
+object.size(volcano_compressed)
+#> 6312 bytes
+object.size(volcano)
+#> 42672 bytes
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+Note that 16 bit floating (`<f2`) point numbers are used for the
+compression which are much less precise than R’s native 64 bit floating
+point numbers. Nonetheless, in this particular case the precision is
+sufficient to restore the volcano data.
 
 ``` r
+volcano_reconstructed <-
+  matrix(
+    blosc_decompress(volcano_compressed, dtype = "<f2"),
+    nrow(volcano),
+    ncol(volcano)
+  )
 
-zarr_dims <-
-  structure(zarray$chunks |> unlist(), names = zattrs$`_ARRAY_DIMENSIONS` |> unlist())
-if (zarray$order == "C") zarr_dims <- rev(zarr_dims)
-
-ar <- array(chunk_data, dim = zarr_dims)
-
-## plot spatial slice at first timestamp
-image(ar[,,1,1])
+image(volcano_reconstructed, col = terrain.colors(24L))
 ```
 
-<img src="man/figures/README-example-2.png" width="100%" />
+<img src="man/figures/README-example2-1.png" width="50%" />
 
-``` r
+## Acknowledgements
 
-## plot time-series
-plot(ar[1,1,1,], type = "l")
-```
+Big thanks to Simon Urbanek for assisting with setting up the MacOS
+config.
 
-<img src="man/figures/README-example-3.png" width="100%" />
+## Code of Conduct
+
+Please note that the blosc project is released with a [Contributor Code
+of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.

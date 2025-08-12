@@ -34,10 +34,10 @@ extern "C" SEXP _blosc_blosc_decompress_dat(SEXP data) {
   END_CPP11
 }
 // dtype.cpp
-sexp dtype_to_r_(raws data, std::string dtype, double na_value);
+sexp dtype_to_r_(raws data, std::string dtype, sexp na_value);
 extern "C" SEXP _blosc_dtype_to_r_(SEXP data, SEXP dtype, SEXP na_value) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dtype_to_r_(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<double>>(na_value)));
+    return cpp11::as_sexp(dtype_to_r_(cpp11::as_cpp<cpp11::decay_t<raws>>(data), cpp11::as_cpp<cpp11::decay_t<std::string>>(dtype), cpp11::as_cpp<cpp11::decay_t<sexp>>(na_value)));
   END_CPP11
 }
 // dtype.cpp
