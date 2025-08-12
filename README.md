@@ -4,6 +4,9 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml)
+[![R-universe
+version](https://pepijn-devries.r-universe.dev/blosc/badges/version)](https://pepijn-devries.r-universe.dev/blosc)
+<!--[![Codecov test coverage](https://codecov.io/gh/pepijn-devries/blosc/graph/badge.svg)](https://app.codecov.io/gh/pepijn-devries/blosc)-->
 <!-- badges: end -->
 
 [Blosc](https://www.blosc.org/) is a blocking, shuffling and lossless
@@ -14,12 +17,10 @@ compressors and decompressors to R.
 
 ## Installation
 
-You can install the development version of blosc from
-[GitHub](https://github.com/) with:
+Install latest developmental version from R-Universe:
 
 ``` r
-# install.packages("pak")
-pak::pak("pepijn-devries/blosc")
+install.packages("blosc", repos = c('https://pepijn-devries.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
 MacOS users may first need to install system requirements before
