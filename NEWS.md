@@ -1,4 +1,4 @@
-# blosc 0.0.1
+# blosc 0.0.1.0001
 
 * Initial version that can:
   * encode and decode specific data types

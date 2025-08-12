@@ -10,6 +10,15 @@
 
 Blosc is a blocking, shuffling and lossless compression algorithm. It is often used to compress n-dimensional structured array data. It is applied (amongst others) in the geo-spatial zarr file format. This package can be used to decompress such data or to compress data.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://pepijn-devries.github.io/blosc/}
+  \item \url{https://github.com/pepijn-devries/blosc/}
+  \item Report bugs at \url{https://github.com/pepijn-devries/blosc/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Pepijn de Vries \email{pepijn.devries@outlook.com} (\href{https://orcid.org/0000-0002-7961-6646}{ORCID})
 
