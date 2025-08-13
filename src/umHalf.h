@@ -35,6 +35,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+With minor modifications by Pepijn de Vries (2025) in order
+to comply with modern compiler standards
 */
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +98,9 @@ public:
 	/** Construction from an existing half
 	 */
 	inline HalfFloat(const HalfFloat& other)
-		: bits(other.GetBits())
-	{}
+	{
+	  bits_.bits = other.GetBits();
+	}
 
 	/** Construction from existing values for mantissa, sign
 	 *  and exponent. No validation is performed.
@@ -198,16 +202,16 @@ public:
 
 public:
 
-	union 
+	union BitFields
 	{
 		uint16_t bits;			// All bits
-		struct 
+		struct Fields
 		{
 			uint16_t Frac : 10;	// mantissa
 			uint16_t Exp  : 5;		// exponent
 			uint16_t Sign : 1;		// sign
 		} IEEE;
-	};
+	} bits_;
 
 
 	union IEEESingle
