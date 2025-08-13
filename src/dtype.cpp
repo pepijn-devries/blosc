@@ -91,10 +91,17 @@ blosc_dtype prepare_dtype(std::string dtype) {
 [[cpp11::register]]
 list dtype_to_list_(std::string dtype) {
   blosc_dtype dt = prepare_dtype(dtype);
-  writable::list result({
-    "byte_size"_nm = writable::integers({ dt.byte_size}),
-      "needs_byteswap"_nm = writable::logicals({dt.needs_byteswap}),
-      "main_type"_nm = writable::strings({std::string(1, dt.main_type)})
+  writable::integers bs((R_xlen_t)1);
+  bs[0] = (int)dt.byte_size;
+  writable::logicals nb((R_xlen_t)1);
+  nb[0] = dt.needs_byteswap;
+  writable::strings mt((R_xlen_t)1);
+  mt[0] = (r_string)std::string(1, dt.main_type);
+  writable::list result({ bs, nb, mt });
+  result.attr("names") = writable::strings({
+    "byte_size",
+    "needs_byteswap",
+    "main_type"
   });
   return result;
 }
