@@ -51,18 +51,18 @@ inline HalfFloat::HalfFloat(float other)
 	IEEESingle f;
 	f.Float = other;
 
-	IEEE.Sign = f.IEEE.Sign;
+	bits_.IEEE.Sign = f.IEEE.Sign;
 
 	if ( !f.IEEE.Exp) 
 	{ 
-		IEEE.Frac = 0;
-		IEEE.Exp = 0;
+		bits_.IEEE.Frac = 0;
+		bits_.IEEE.Exp = 0;
 	}
 	else if (f.IEEE.Exp==0xff) 
 	{ 
 		// NaN or INF
-		IEEE.Frac = (f.IEEE.Frac!=0) ? 1 : 0;
-		IEEE.Exp = 31;
+		bits_.IEEE.Frac = (f.IEEE.Frac!=0) ? 1 : 0;
+		bits_.IEEE.Exp = 31;
 	}
 	else 
 	{ 
@@ -71,41 +71,41 @@ inline HalfFloat::HalfFloat(float other)
 
 		if (new_exp<-24) 
 		{ // this maps to 0
-			IEEE.Frac = 0;
-			IEEE.Exp = 0;
+			bits_.IEEE.Frac = 0;
+			bits_.IEEE.Exp = 0;
 		}
 
 		else if (new_exp<-14) 
 		{
 			// this maps to a denorm
-			IEEE.Exp = 0;
+			bits_.IEEE.Exp = 0;
 			unsigned int exp_val = (unsigned int) (-14 - new_exp);  // 2^-exp_val
 			switch (exp_val) 
 			{
 			case 0: 
-				IEEE.Frac = 0; 
+				bits_.IEEE.Frac = 0; 
 				break;
-			case 1: IEEE.Frac = 512 + (f.IEEE.Frac>>14); break;
-			case 2: IEEE.Frac = 256 + (f.IEEE.Frac>>15); break;
-			case 3: IEEE.Frac = 128 + (f.IEEE.Frac>>16); break;
-			case 4: IEEE.Frac = 64 + (f.IEEE.Frac>>17); break;
-			case 5: IEEE.Frac = 32 + (f.IEEE.Frac>>18); break;
-			case 6: IEEE.Frac = 16 + (f.IEEE.Frac>>19); break;
-			case 7: IEEE.Frac = 8 + (f.IEEE.Frac>>20); break;
-			case 8: IEEE.Frac = 4 + (f.IEEE.Frac>>21); break;
-			case 9: IEEE.Frac = 2 + (f.IEEE.Frac>>22); break;
-			case 10: IEEE.Frac = 1; break;
+			case 1: bits_.IEEE.Frac = 512 + (f.IEEE.Frac>>14); break;
+			case 2: bits_.IEEE.Frac = 256 + (f.IEEE.Frac>>15); break;
+			case 3: bits_.IEEE.Frac = 128 + (f.IEEE.Frac>>16); break;
+			case 4: bits_.IEEE.Frac = 64 + (f.IEEE.Frac>>17); break;
+			case 5: bits_.IEEE.Frac = 32 + (f.IEEE.Frac>>18); break;
+			case 6: bits_.IEEE.Frac = 16 + (f.IEEE.Frac>>19); break;
+			case 7: bits_.IEEE.Frac = 8 + (f.IEEE.Frac>>20); break;
+			case 8: bits_.IEEE.Frac = 4 + (f.IEEE.Frac>>21); break;
+			case 9: bits_.IEEE.Frac = 2 + (f.IEEE.Frac>>22); break;
+			case 10: bits_.IEEE.Frac = 1; break;
 			}
 		}
 		else if (new_exp>15) 
 		{ // map this value to infinity
-			IEEE.Frac = 0;
-			IEEE.Exp = 31;
+			bits_.IEEE.Frac = 0;
+			bits_.IEEE.Exp = 31;
 		}
 		else 
 		{
-			IEEE.Exp = new_exp+15;
-			IEEE.Frac = (f.IEEE.Frac >> 13);
+			bits_.IEEE.Exp = new_exp+15;
+			bits_.IEEE.Frac = (f.IEEE.Frac >> 13);
 		}
 	}
 }
@@ -115,29 +115,29 @@ inline HalfFloat::HalfFloat(const double p_Reference)
 	const IEEEDouble & l_Reference = reinterpret_cast<const IEEEDouble &>(p_Reference);
 
 	// Copy the sign bit.
-	this->IEEE.Sign = l_Reference.IEEE.Sign;
+	this->bits_.IEEE.Sign = l_Reference.IEEE.Sign;
 
 	// Check for special values: Is the exponent zero?
 	if(0 == l_Reference.IEEE.Exp) 
 	{
 		// A zero exponent indicates either a zero or a subnormal number. A subnormal float can not
 		//	be represented as a half, so either one will be saved as a zero.
-		this->IEEE.Exp = 0;
-		this->IEEE.Frac = 0;
+		this->bits_.IEEE.Exp = 0;
+		this->bits_.IEEE.Frac = 0;
 	}
 	// Is the exponent all one?
 	else if(IEEEDouble_MaxExpontent == l_Reference.IEEE.Exp)
 	{
-		this->IEEE.Exp = MAX_EXPONENT_VALUE;
+		this->bits_.IEEE.Exp = MAX_EXPONENT_VALUE;
 		// A zero fraction indicates an Infinite value.
 		if(0 == l_Reference.IEEE.Frac)
-			this->IEEE.Frac = 0;
+			this->bits_.IEEE.Frac = 0;
 		// A nonzero fraction indicates NaN. Such a fraction contains further information, e.g. to
 		//	distinguish a QNaN from a SNaN. However, we can not just shift-copy the fraction:
 		//	if the first five bits were zero we would save an infinite value, so we abandon the
 		//	fraction information and set it to a nonzero value.
 		else
-			this->IEEE.Frac = 1;
+			this->bits_.IEEE.Frac = 1;
 	}
 	// A usual value?
 	else {
@@ -148,53 +148,53 @@ inline HalfFloat::HalfFloat(const double p_Reference)
 		// Very small values will be rounded to zero.
 		if(-24 > l_AdjustedExponent)
 		{
-			this->IEEE.Frac = 0;
-			this->IEEE.Exp = 0;
+			this->bits_.IEEE.Frac = 0;
+			this->bits_.IEEE.Exp = 0;
 		}
 		// Some small values can be stored as subnormal values.
 		else if(-14 > l_AdjustedExponent) 
 		{
 			// The exponent of subnormal values is always be zero.
-			this->IEEE.Exp = 0;
+			this->bits_.IEEE.Exp = 0;
 			// The exponent will now be stored in the fraction.
 			const int16_t l_NewExponent = int16_t(-14 - l_AdjustedExponent);  // 2 ^ -l_NewExponent
-			this->IEEE.Frac = (1024 >> l_NewExponent) + int16_t(l_Reference.IEEE.Frac >> (42 + l_NewExponent));
+			this->bits_.IEEE.Frac = (1024 >> l_NewExponent) + int16_t(l_Reference.IEEE.Frac >> (42 + l_NewExponent));
 		}
 		// Very large numbers will be rounded to infinity.
 		else if(15 < l_AdjustedExponent) 
 		{
 			// Exponent all one, fraction zero.
-			this->IEEE.Exp = MAX_EXPONENT_VALUE;
-			this->IEEE.Frac = 0;
+			this->bits_.IEEE.Exp = MAX_EXPONENT_VALUE;
+			this->bits_.IEEE.Frac = 0;
 		}
 		// All remaining numbers can be converted directly.
 		else 
 		{
 			// We reconstructed the exponent by subtracting the bias. To store it as an unsigned
 			//	int, we need to add the bias again.
-			this->IEEE.Exp = l_AdjustedExponent + BIAS;
+			this->bits_.IEEE.Exp = l_AdjustedExponent + BIAS;
 			// When storing the fraction, we abandon its least significant bits by right-shifting.
 			//	The fraction of a double is 42 bits wider than that of a half, so we shift 42 bits.
-			this->IEEE.Frac = (l_Reference.IEEE.Frac >> 42);
+			this->bits_.IEEE.Frac = (l_Reference.IEEE.Frac >> 42);
 		};
 	}; // else usual number
 } 
 // ------------------------------------------------------------------------------------------------
 inline HalfFloat::HalfFloat(uint16_t _m,uint16_t _e,uint16_t _s)
 {
-    IEEE.Frac = _m;
-	IEEE.Exp = _e;
-	IEEE.Sign = _s;
+  bits_.IEEE.Frac = _m;
+	bits_.IEEE.Exp = _e;
+	bits_.IEEE.Sign = _s;
 }
 // ------------------------------------------------------------------------------------------------
 HalfFloat::operator float() const
 {
 	IEEESingle sng;
-	sng.IEEE.Sign = IEEE.Sign;
+	sng.IEEE.Sign = bits_.IEEE.Sign;
 
-	if (!IEEE.Exp) 
+	if (!bits_.IEEE.Exp) 
 	{  
-		if (!IEEE.Frac)
+		if (!bits_.IEEE.Frac)
 		{
 			sng.IEEE.Frac=0;
 			sng.IEEE.Exp=0;
@@ -202,20 +202,20 @@ HalfFloat::operator float() const
 		else
 		{
 			const float half_denorm = (1.0f/16384.0f); 
-			float mantissa = ((float)(IEEE.Frac)) / 1024.0f;
-			float sgn = (IEEE.Sign)? -1.0f :1.0f;
+			float mantissa = ((float)(bits_.IEEE.Frac)) / 1024.0f;
+			float sgn = (bits_.IEEE.Sign)? -1.0f :1.0f;
 			sng.Float = sgn*mantissa*half_denorm;
 		}
 	}
-	else if (31 == IEEE.Exp)
+	else if (31 == bits_.IEEE.Exp)
 	{
 		sng.IEEE.Exp = 0xff;
-		sng.IEEE.Frac = (IEEE.Frac!=0) ? 1 : 0;
+		sng.IEEE.Frac = (bits_.IEEE.Frac!=0) ? 1 : 0;
 	}
 	else 
 	{
-		sng.IEEE.Exp = IEEE.Exp+112;
-		sng.IEEE.Frac = (IEEE.Frac << 13);
+		sng.IEEE.Exp = bits_.IEEE.Exp+112;
+		sng.IEEE.Frac = (bits_.IEEE.Frac << 13);
 	}
 	return sng.Float;
 }
@@ -225,32 +225,32 @@ inline HalfFloat::operator double(void) const
 	IEEEDouble l_Result;
 
 	// Copy the sign bit.
-	l_Result.IEEE.Sign = this->IEEE.Sign;
+	l_Result.IEEE.Sign = this->bits_.IEEE.Sign;
 
 	// In a zero, both the exponent and the fraction are zero.
-	if((0 == this->IEEE.Exp) && (0 == this->IEEE.Frac)) 
+	if((0 == this->bits_.IEEE.Exp) && (0 == this->bits_.IEEE.Frac)) 
 	{
 		l_Result.IEEE.Exp = 0;
 		l_Result.IEEE.Frac = 0;
 	}
 	// If the exponent is zero and the fraction is nonzero, the number is subnormal.
-	else if((0 == this->IEEE.Exp) && (0 != this->IEEE.Frac)) 
+	else if((0 == this->bits_.IEEE.Exp) && (0 != this->bits_.IEEE.Frac)) 
 	{
 		// sign * 2^-14 * fraction
-		l_Result.Double = (this->IEEE.Sign ? -1.0 : +1.0) / 16384.0 * (double(this->IEEE.Frac) / 1024.0);
+		l_Result.Double = (this->bits_.IEEE.Sign ? -1.0 : +1.0) / 16384.0 * (double(this->bits_.IEEE.Frac) / 1024.0);
 	}
 	// Is the exponent all one?
-	else if(MAX_EXPONENT_VALUE == this->IEEE.Exp) 
+	else if(MAX_EXPONENT_VALUE == this->bits_.IEEE.Exp) 
 	{
 		l_Result.IEEE.Exp = IEEEDouble_MaxExpontent;
 		// A zero fraction indicates an infinite value.
-		if(0 == this->IEEE.Frac)
+		if(0 == this->bits_.IEEE.Frac)
 			l_Result.IEEE.Frac = 0;
 		// A nonzero fraction indicates a NaN. We can re-use the fraction information: a double
 		//	fraction is 42 bits wider than a half fraction, so we can just left-shift it. Any
 		//	information on QNaNs or SNaNs will be preserved.
 		else
-			l_Result.IEEE.Frac = uint64_t(this->IEEE.Frac) << 42;
+			l_Result.IEEE.Frac = uint64_t(this->bits_.IEEE.Frac) << 42;
 	}
 	// A usual value?
 	else 
@@ -258,36 +258,36 @@ inline HalfFloat::operator double(void) const
 		// The exponent is stored as an unsigned int. To reconstruct its original value, we have to
 		//	subtract its bias. To re-store it in a wider bit field, we must add the bias of the new
 		//	bit field.
-		l_Result.IEEE.Exp = uint64_t(this->IEEE.Exp) - BIAS + IEEEDouble_ExponentBias;
+		l_Result.IEEE.Exp = uint64_t(this->bits_.IEEE.Exp) - BIAS + IEEEDouble_ExponentBias;
 		// A double fraction is 42 bits wider than a half fraction, so we can just left-shift it.
-		l_Result.IEEE.Frac = uint64_t(this->IEEE.Frac) << 42;
+		l_Result.IEEE.Frac = uint64_t(this->bits_.IEEE.Frac) << 42;
 	}
 	return l_Result.Double;
 } 
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::IsNaN() const
 {
-	return IEEE.Frac != 0 && IEEE.Exp == MAX_EXPONENT_VALUE;
+	return bits_.IEEE.Frac != 0 && bits_.IEEE.Exp == MAX_EXPONENT_VALUE;
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::IsInfinity() const
 {
-	return IEEE.Frac == 0 && IEEE.Exp == MAX_EXPONENT_VALUE;
+	return bits_.IEEE.Frac == 0 && bits_.IEEE.Exp == MAX_EXPONENT_VALUE;
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::IsDenorm() const
 {
-	return IEEE.Exp == 0;
+	return bits_.IEEE.Exp == 0;
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::GetSign() const
 {
-	return IEEE.Sign == 0;
+	return bits_.IEEE.Sign == 0;
 }
 // ------------------------------------------------------------------------------------------------
 inline HalfFloat& HalfFloat::operator= (HalfFloat other)
 {
-	bits = other.GetBits();
+	bits_.bits = other.GetBits();
 	return *this;
 }
 // ------------------------------------------------------------------------------------------------
@@ -305,17 +305,17 @@ inline HalfFloat& HalfFloat::operator= (const double p_Reference)
 inline bool HalfFloat::operator== (HalfFloat other) const
 {
 	// +0 and -0 are considered to be equal
-	if ((bits << 1u) == 0 && (other.bits << 1u) == 0)return true;
+	if ((bits_.bits << 1u) == 0 && (other.bits_.bits << 1u) == 0)return true;
 
-	return bits == other.bits && !this->IsNaN();
+	return bits_.bits == other.bits_.bits && !this->IsNaN();
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::operator!= (HalfFloat other) const
 {
 	// +0 and -0 are considered to be equal
-	if ((bits << 1u) == 0 && (other.bits << 1u) == 0)return false;
+	if ((bits_.bits << 1u) == 0 && (other.bits_.bits << 1u) == 0)return false;
 
-	return bits != other.bits || this->IsNaN();
+	return bits_.bits != other.bits_.bits || this->IsNaN();
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::operator<  (HalfFloat other) const
@@ -325,7 +325,7 @@ inline bool HalfFloat::operator<  (HalfFloat other) const
 		return false;
 	
 	// this works since the segment oder is s,e,m.
-	return (int16_t)this->bits < (int16_t)other.GetBits();
+	return (int16_t)this->bits_.bits < (int16_t)other.GetBits();
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::operator>  (HalfFloat other) const
@@ -335,7 +335,7 @@ inline bool HalfFloat::operator>  (HalfFloat other) const
 		return false;
 	
 	// this works since the segment oder is s,e,m.
-	return (int16_t)this->bits > (int16_t)other.GetBits();
+	return (int16_t)this->bits_.bits > (int16_t)other.GetBits();
 }
 // ------------------------------------------------------------------------------------------------
 inline bool HalfFloat::operator<= (HalfFloat other) const
@@ -424,38 +424,38 @@ inline HalfFloat HalfFloat::operator--(int)
 // ------------------------------------------------------------------------------------------------
 inline HalfFloat HalfFloat::operator-() const
 {
-	return HalfFloat(IEEE.Frac,IEEE.Exp,~IEEE.Sign);
+	return HalfFloat(bits_.IEEE.Frac,bits_.IEEE.Exp,~bits_.IEEE.Sign);
 }
 // ------------------------------------------------------------------------------------------------
 inline uint16_t HalfFloat::GetBits() const
 {
-	return bits;
+	return bits_.bits;
 }
 // ------------------------------------------------------------------------------------------------
 inline uint16_t& HalfFloat::GetBits()
 {
-	return bits;
+	return bits_.bits;
 }
 // ------------------------------------------------------------------------------------------------
 inline HalfFloat operator+ (HalfFloat one, HalfFloat two) 
 {
 #if (!defined HALFFLOAT_NO_CUSTOM_IMPLEMENTATIONS)
 
-	if (one.IEEE.Exp == HalfFloat::MAX_EXPONENT_VALUE)	
+	if (one.bits_.IEEE.Exp == HalfFloat::MAX_EXPONENT_VALUE)	
 	{
 		// if one of the components is NaN the result becomes NaN, too.
-		if (0 != one.IEEE.Frac || two.IsNaN())
+		if (0 != one.bits_.IEEE.Frac || two.IsNaN())
 			return HalfFloat(1,HalfFloat::MAX_EXPONENT_VALUE,0);
 
 		// otherwise this must be infinity
-		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,one.IEEE.Sign | two.IEEE.Sign);
+		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,one.bits_.IEEE.Sign | two.bits_.IEEE.Sign);
 	}
-	else if (two.IEEE.Exp == HalfFloat::MAX_EXPONENT_VALUE)	
+	else if (two.bits_.IEEE.Exp == HalfFloat::MAX_EXPONENT_VALUE)	
 	{
-		if (one.IsNaN() || 0 != two.IEEE.Frac)
+		if (one.IsNaN() || 0 != two.bits_.IEEE.Frac)
 			return HalfFloat(1,HalfFloat::MAX_EXPONENT_VALUE,0);
 
-		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,one.IEEE.Sign | two.IEEE.Sign);
+		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,one.bits_.IEEE.Sign | two.bits_.IEEE.Sign);
 	}
 
 	HalfFloat out;
@@ -463,18 +463,18 @@ inline HalfFloat operator+ (HalfFloat one, HalfFloat two)
 
 	// compute the difference between the two exponents. shifts with negative
 	// numbers are undefined, thus we need two code paths
-	int expDiff = one.IEEE.Exp - two.IEEE.Exp;
+	int expDiff = one.bits_.IEEE.Exp - two.bits_.IEEE.Exp;
 	
 	if (0 == expDiff)
 	{
 		// the exponents are equal, thus we must just add the hidden bit
-		temp = two.IEEE.Exp;
+		temp = two.bits_.IEEE.Exp;
 
-		if (0 == one.IEEE.Exp)m1 = one.IEEE.Frac;
-		else m1 = (int)one.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA ); 
+		if (0 == one.bits_.IEEE.Exp)m1 = one.bits_.IEEE.Frac;
+		else m1 = (int)one.bits_.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA ); 
 
-		if (0 == two.IEEE.Exp)m2 = two.IEEE.Frac;
-		else m2 = (int)two.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA );
+		if (0 == two.bits_.IEEE.Exp)m2 = two.bits_.IEEE.Frac;
+		else m2 = (int)two.bits_.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA );
 	}
 	else 
 	{
@@ -484,19 +484,19 @@ inline HalfFloat operator+ (HalfFloat one, HalfFloat two)
 			std::swap(one,two);
 		}
 
-		m1 = (int)one.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA ); 
+		m1 = (int)one.bits_.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA ); 
 
-		if (0 == two.IEEE.Exp)m2 = two.IEEE.Frac;
-		else m2 = (int)two.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA );
+		if (0 == two.bits_.IEEE.Exp)m2 = two.bits_.IEEE.Frac;
+		else m2 = (int)two.bits_.IEEE.Frac | ( 1 << HalfFloat::BITS_MANTISSA );
 
 		if (expDiff < (int)((sizeof(long)<<3)-(HalfFloat::BITS_MANTISSA+1)))
 		{
 			m1 <<= expDiff;
-			temp = two.IEEE.Exp;
+			temp = two.bits_.IEEE.Exp;
 		}
 		else 
 		{
-			if (0 != two.IEEE.Exp)
+			if (0 != two.bits_.IEEE.Exp)
 			{
 				// arithmetic underflow
 				if (expDiff > HalfFloat::BITS_MANTISSA)return HalfFloat(0,0,0); 
@@ -505,20 +505,20 @@ inline HalfFloat operator+ (HalfFloat one, HalfFloat two)
 					m2 >>= expDiff;
 				}
 			}
-			temp = one.IEEE.Exp;
+			temp = one.bits_.IEEE.Exp;
 		}
 	}
 	
 	// convert from sign-bit to two's complement representation
-	if (one.IEEE.Sign)m1 = -m1;
-	if (two.IEEE.Sign)m2 = -m2;
+	if (one.bits_.IEEE.Sign)m1 = -m1;
+	if (two.bits_.IEEE.Sign)m2 = -m2;
 	m1 += m2;
 	if (m1 < 0)
 	{
-		out.IEEE.Sign = 1;
+		out.bits_.IEEE.Sign = 1;
 		m1 = -m1; 
 	}
-	else out.IEEE.Sign = 0;
+	else out.bits_.IEEE.Sign = 0;
 
 	// and renormalize the result to fit in a half
 	if (0 == m1)return HalfFloat(0,0,0);
@@ -533,7 +533,7 @@ inline HalfFloat operator+ (HalfFloat one, HalfFloat two)
 	if (expDiff >= HalfFloat::MAX_EXPONENT_VALUE)
 	{
 		// arithmetic overflow. return INF and keep the sign
-		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,out.IEEE.Sign);
+		return HalfFloat(0,HalfFloat::MAX_EXPONENT_VALUE,out.bits_.IEEE.Sign);
 	}
 	else if (temp <= 0)
 	{
@@ -547,8 +547,8 @@ inline HalfFloat operator+ (HalfFloat one, HalfFloat two)
 		if (expDiff < 0)m1 <<= (-expDiff);
 		else m1 >>= expDiff; // m1 >= 0
 	}
-	out.IEEE.Frac = m1;
-	out.IEEE.Exp = temp;
+	out.bits_.IEEE.Frac = m1;
+	out.bits_.IEEE.Exp = temp;
 	return out;
 
 #else
