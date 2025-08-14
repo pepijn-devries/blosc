@@ -452,7 +452,7 @@ void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
   if (dtype.main_type == 'c') {
     // Real and imaginary components need to be swapped individually
     bs = bs/2;
-    n = n*2;
+    n2 = n*2;
   }
   if (bs == 1) return; // Nothing to swap
   uint8_t buffer[MAX_DTYPE_SIZE];
