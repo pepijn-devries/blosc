@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml)
 [![R-universe version](https://pepijn-devries.r-universe.dev/blosc/badges/version)](https://pepijn-devries.r-universe.dev/blosc)
-<!--[![Codecov test coverage](https://codecov.io/gh/pepijn-devries/blosc/graph/badge.svg)](https://app.codecov.io/gh/pepijn-devries/blosc)-->
+[![Codecov test coverage](https://codecov.io/gh/pepijn-devries/blosc/graph/badge.svg)](https://app.codecov.io/gh/pepijn-devries/blosc)
 <!-- badges: end -->
 
 [Blosc](https://www.blosc.org/) is a blocking, shuffling and lossless compression
