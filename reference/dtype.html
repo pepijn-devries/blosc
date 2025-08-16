@@ -9,7 +9,7 @@ convert between R native types and raw data."><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.0001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.0002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,10 +61,12 @@ a code consisting of at least 3 characters. The first character indicates the
 (little-endian), <code>'&gt;'</code> (big-endian), or <code>'|'</code> (endianness not relevant).</p>
 <p>The second character represents the main data type (<code>'b'</code> boolean (logical),
 <code>'i'</code> signed integer, <code>'u'</code> unsigned integer, <code>'f'</code> floating point number,
-<code>'c'</code> complex number).</p>
-<p>The final characters are numerical indicating the byte size of the data type.
+<code>'c'</code> complex number). <code>'M'</code> is used for date-time objects.</p>
+<p>The following characters are numerical indicating the byte size of the data type.
 For example: <code>dtype = "&lt;f4"</code> means a 32 bit floating point number; <code>dtype = "|b1"</code>
 means an 8 bit logical value.</p>
+<p>The main type <code>'M'</code> should always be ended with the time unit between square brackets
+for storing the date time. A valid code would be <code>"&lt;M8[h]</code>.</p>
 <p>For more details about dtypes see
 <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html" class="external-link">ZARR V2.0</a></p></dd>
 
