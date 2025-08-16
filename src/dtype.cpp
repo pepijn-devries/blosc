@@ -1,14 +1,32 @@
 #include <cpp11.hpp>
+#include <regex>
 #include "umHalf.h"
 
 using namespace cpp11;
 
+// Careful : days_in_year is for base-0 years, days_in_month for base-1970.
+#define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
+#define days_in_year(year) (isleap(year) ? 366 : 365)
+#define days_in_month(mon, yr) ((mon == 1 && isleap(1900+yr)) ? 29 : month_days[mon])
 #define MAX_DTYPE_SIZE 255
+
+static const int month_days[12] =
+  {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+static const char *dt_units[] = {
+ "W", "D", "h", "m", "s", "ms", "us", "μs", "ns", "ps", "fs", "as"
+};
+
+static const double to_seconds[] {
+  604800, 86400, 3600, 60, 1, 1e-3, 1e-6, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18
+};
 
 typedef struct {
   bool needs_byteswap;
   char main_type;
   uint8_t byte_size;
+  std::string unit;
+  double unit_conversion;
 } blosc_dtype;
 
 typedef struct {
@@ -44,10 +62,39 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value);
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n);
 
+void getYM(double d, int64_t &mon, int64_t &Y) {
+  bool valid = R_FINITE(d) != 0;
+  int64_t y = 1970, tmp;
+
+  if(valid) {
+    /* every 400 years is exactly 146097 days long and the
+     pattern is repeated */
+    double rounds = floor(floor(d) / 146097.0);
+    int64_t day = (int64_t) (floor(d) - 146097.0 * rounds);
+
+    /* year & day within year */
+    if (day >= 0)
+      for ( ; day >= (tmp = days_in_year(y)); day -= tmp, y++);
+    else
+      for ( ; day < 0; --y, day += days_in_year(y) );
+    // Avoid overflows
+    double year0 =  y - 1900 + rounds * 400;
+    y = (int64_t)year0;
+    /* month within year */
+    for (mon = 0;
+         day >= (tmp = days_in_month(mon, y));
+         day -= tmp, mon++);
+  } else {
+    stop("Invalid date time");
+  }
+  mon++;
+  Y = y + 1900;
+}
+
 blosc_dtype prepare_dtype(std::string dtype) {
   blosc_dtype dt;
   int dlen = dtype.length();
-  if (dlen < 3 || dlen > 5) stop("'dtype should be between 3 and 5 character long!");
+  if (dlen < 3 || dlen > 9) stop("'dtype should be between 3 and 9 character long!");
   char byte_order = dtype.c_str()[0];
   if (byte_order != '<' && byte_order != '>' && byte_order != '|')
     stop("Unknown byte order '%c'", byte_order);
@@ -65,14 +112,16 @@ blosc_dtype prepare_dtype(std::string dtype) {
       stop("Datatype '%c' not known or implemented", dt.main_type);
     
     uint32_t bz = 0;
-    for (int i = 2; i < (int)dtype.length(); i++) {
+    int i;
+    for (i = 2; i < (int)dtype.length(); i++) {
       int s = dtype.c_str()[i] - '0';
-      if (s < 0 || s > 9) stop("Invalid byte size");
+      if (s < 0 || s > 9) break;
       bz *= 10;
       bz += s;
     }
-    if (bz > MAX_DTYPE_SIZE) stop("Invalid byte size");
+    if (bz < 1 || bz > MAX_DTYPE_SIZE) stop("Invalid byte size");
     dt.byte_size = (uint8_t)bz;
+    
     
     if (dt.main_type == 'b' && dt.byte_size != 1)
       stop("Unknown data type '%s'", dtype.c_str());
@@ -84,7 +133,33 @@ blosc_dtype prepare_dtype(std::string dtype) {
       stop("Unknown data type '%s'", dtype.c_str());
     if (dt.main_type == 'c' && dt.byte_size != 8 && dt.byte_size != 16)
       stop("Unknown data type '%s'", dtype.c_str());
+    if (dt.main_type == 'M' && dt.byte_size != 8)
+      stop("Unknown data type '%s'", dtype.c_str());
     
+    dt.unit = "";
+    std::smatch match;
+    std::regex rgx("\\[.*?\\]$");
+    if (std::regex_search(dtype, match, rgx)) {
+      dt.unit = match[0];
+      if (dt.unit.length() < 3) stop("Invalid unit");
+      dt.unit.erase(0, 1);
+      dt.unit.erase(dt.unit.length() - 1, 1);
+    }
+    
+    dt.unit_conversion = -1;
+    if (dt.unit.length() > 0) {
+      if (dt.main_type == 'M') {
+        for (int j = 0; j < (int)std::size(dt_units); j++) {
+          if (dt.unit == dt_units[j]) {
+            dt.unit_conversion = to_seconds[j];
+            break;
+          }
+        }
+      } else {
+        warning("Unknown unit");
+      }
+    }
+
     return dt;
 }
 
@@ -97,13 +172,25 @@ list dtype_to_list_(std::string dtype) {
   nb[0] = dt.needs_byteswap;
   writable::strings mt((R_xlen_t)1);
   mt[0] = (r_string)std::string(1, dt.main_type);
-  writable::list result({ bs, nb, mt });
+  writable::strings ut((R_xlen_t)1);
+  ut[0] = dt.unit;
+  writable::doubles uc((R_xlen_t)1);
+  uc[0] = dt.unit_conversion;
+  writable::list result({ bs, nb, mt, ut, uc });
   result.attr("names") = writable::strings({
     "byte_size",
     "needs_byteswap",
-    "main_type"
+    "main_type",
+    "unit",
+    "unit_conversion"
   });
   return result;
+}
+
+int64_t numdays(int64_t y, int64_t m, int64_t d) {
+  m = (m + 9) % 12;
+  y = y - m/10;
+  return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
 }
 
 [[cpp11::register]]
@@ -117,6 +204,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   cempty.imaginary = 0.0;
   empty.c16 = cempty;
   conv = empty;
+  int64_t bigint = 0;
   int n = data.size() / dt.byte_size, mult_factor = 1;
   uint8_t *src;
   if (dt.needs_byteswap) {
@@ -129,7 +217,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   }
   
   uint8_t *dest;
-
+  
   sexp result;
   
   if (dt.main_type == 'b' && dt.byte_size == 1) {
@@ -147,12 +235,16 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
     result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
-  } else if(dt.main_type == 'f' && dt.byte_size <= 8) {
+  } else if((dt.main_type == 'f' || dt.main_type == 'M') &&
+    dt.byte_size <= 8) {
     result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
     mult_factor = 2;
     result = writable::doubles((R_xlen_t) 2 * n);
+    dest = (uint8_t *)REAL(result);
+  } else if (dt.main_type == 'M' && dt.byte_size == 8) {
+    result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
   } else {
     stop("Cannot convert data type to an R type");
@@ -183,6 +275,30 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     memcpy(cptr, dest, n * sizeof(Rcomplex));
     UNPROTECT(1);
     return c;
+  }
+  if (dt.main_type == 'M') {
+    result.attr("class") = writable::strings({"POSIXct", "POSIXt"});
+    result.attr("tzone") = writable::strings((r_string)"UTC");
+    double *d = REAL(result);
+      
+    for (int j = 0; j < n; j++) {
+      memcpy(&bigint, (int64_t *)(&(d[j])), sizeof(double));
+      if (dt.unit_conversion > 0) {
+        d[j] = ((double)bigint)*dt.unit_conversion;
+      } else {
+        
+        if (dt.unit == "Y") {
+          d[j] = (double)(numdays(1970 + bigint, 1, 1) - numdays(1970, 1, 1)) *
+            86400;
+        } else if (dt.unit == "M") {
+          d[j] = (double)(numdays(1970 + bigint/12, bigint%12 + 1, 1) -
+            numdays(1970, 1, 1)) * 86400;
+          
+        } else {
+          stop("Unit conversion not possible/implemented");
+        }
+      }
+    }
   }
   if (warn) warning("Data contains values equal to R's NA representation");
   return result;
@@ -234,7 +350,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     } else {
       stop("Conversion not implemented");
     }
-
+    
     if (!ignore_na) {
       int nval = INTEGER(na_value)[0];
       if (i == NA_INTEGER && nval != NA_INTEGER) warn_na = true;
@@ -255,7 +371,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       d = double(f);
     } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
       d = (double)(*input).f4;
-    } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
+    } else if ((dtype.main_type == 'f' || dtype.main_type == 'M') &&
+      dtype.byte_size == 8) {
       d = (*input).f8;
     } else if (dtype.main_type == 'c' && dtype.byte_size == 8) {
       d = (double)(*input).f4;
@@ -267,8 +384,18 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     
     if (!ignore_na) {
       double nval = REAL(na_value)[0];
-      if (R_IsNA(d) && !R_IsNA(nval)) warn_na = true;
-      if (d == nval) d = NA_REAL;
+      if (dtype.main_type == 'M') {
+        int64_t na_cor;
+        memcpy(&na_cor, (int64_t *)(&NA_REAL), sizeof(double));
+        
+        int64_t bigint = nval / dtype.unit_conversion;
+        memcpy(&nval, (double *)(&bigint), sizeof(double));
+        if ((*input).i8 == na_cor && bigint != na_cor) warn_na = true;
+        if ((*input).i8 == bigint) d = NA_REAL;
+      } else {
+        if (R_IsNA(d) && !R_IsNA(nval)) warn_na = true;
+        if (d == nval) d = NA_REAL;
+      }
     }
     
     memcpy(output, &d, sizeof(double));
@@ -289,17 +416,18 @@ void convert_data(uint8_t *input, int rtype, int n,
   cempty.real = 0.0;
   cempty.imaginary = 0.0;
   empty.c16 = cempty; // <== an empty conversion type (all bits set to zero)
+  int64_t bigint = 0;
   for (int i = 0; i < n; i++) {
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
-
+        
         if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
           conv.i1 = 0xff & INTEGER(na_value)[0]; else
             conv.b1 = (bool)((int *)input)[i];
-        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
-          warn_na = true;
-        
+          if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
+            warn_na = true;
+          
       } else {
         stop("Failed to convert data");
       }
@@ -312,13 +440,13 @@ void convert_data(uint8_t *input, int rtype, int n,
             if (!ignore_na && ((int *)input)[i] == INTEGER(na_value)[0])
               warn_na = true;
           }
-
+          
       } else {
         stop("Failed to convert data");
       }
     } else if (rtype == REALSXP) {
       if (dtype.main_type == 'i') {
-
+        
         if (!ignore_na && R_IsNA(((double *)input)[i]))
           conv.i8 = (int64_t)REAL(na_value)[0]; else {
             conv.i8 = (int64_t)((double *)input)[i];
@@ -337,10 +465,10 @@ void convert_data(uint8_t *input, int rtype, int n,
               warn_na = true;
           }
           
-        conv.f2 = f.GetBits();
-
+          conv.f2 = f.GetBits();
+          
       } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
-
+        
         if (!ignore_na && R_IsNA(((double *)input)[i]))
           conv.f4 = (float)REAL(na_value)[0]; else {
             conv.f4 = (float)((double *)input)[i];
@@ -349,13 +477,40 @@ void convert_data(uint8_t *input, int rtype, int n,
           }
           
       } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
-
+        
         if (!ignore_na && R_IsNA(((double *)input)[i]))
           conv.f8 = REAL(na_value)[0]; else {
             conv.f8 = ((double *)input)[i];
             if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
               warn_na = true;
           }
+      } else if (dtype.main_type == 'M' && dtype.byte_size == 8) {
+        
+        if (!ignore_na && R_IsNA(((double *)input)[i])) {
+          conv.f8 = REAL(na_value)[0];
+        } else {
+          conv.f8 = ((double *)input)[i];
+        }
+        if (dtype.unit_conversion > 0) {
+          bigint = conv.f8/dtype.unit_conversion;
+          memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
+        } else {
+          int64_t mon, yr;
+          getYM(conv.f8/86400, mon, yr);
+          yr = yr - 1970;
+          if (dtype.unit == "Y") {
+            memcpy(&conv.f8, (double *)(&yr), sizeof(double));
+          } else if (dtype.unit == "M") {
+            mon = yr*12 + mon - 1;
+            memcpy(&conv.f8, (double *)(&mon), sizeof(double));
+
+          } else {
+            stop("Unable to convert unit");
+          }
+        }
+        if (!ignore_na && conv.f8 == REAL(na_value)[0])
+          warn_na = true;
+        
           
       } else {
         stop("Failed to convert data");
@@ -376,7 +531,7 @@ void convert_data(uint8_t *input, int rtype, int n,
             conv.c8.real      = (float)re;
             conv.c8.imaginary = (float)im;
             if (!ignore_na && re == c.r && im == c.i)
-                warn_na = true;
+              warn_na = true;
           }
           
         } else if (dtype.byte_size == 16) {
@@ -410,7 +565,7 @@ void convert_data(uint8_t *input, int rtype, int n,
 [[cpp11::register]]
 raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   blosc_dtype dt = prepare_dtype(dtype);
-
+  
   if (!Rf_isVector(data)) stop("Input data is not a vector!");
   
   int n = LENGTH(data);
@@ -430,7 +585,8 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
     data = Rf_coerceVector(data, REALSXP);
     ptr_in = (uint8_t *)REAL(data);
-  } else if(dt.main_type == 'f' && dt.byte_size <= 8) {
+  } else if((dt.main_type == 'f' || dt.main_type == 'M') &&
+    dt.byte_size <= 8) {
     data = Rf_coerceVector(data, REALSXP);
     ptr_in = (uint8_t *)REAL(data);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {

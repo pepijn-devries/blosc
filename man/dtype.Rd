@@ -19,11 +19,14 @@ a code consisting of at least 3 characters. The first character indicates the
 
 The second character represents the main data type (\code{'b'} boolean (logical),
 \code{'i'} signed integer, \code{'u'} unsigned integer, \code{'f'} floating point number,
-\code{'c'} complex number).
+\code{'c'} complex number). \code{'M'} is used for date-time objects.
 
-The final characters are numerical indicating the byte size of the data type.
+The following characters are numerical indicating the byte size of the data type.
 For example: \code{dtype = "<f4"} means a 32 bit floating point number; \code{dtype = "|b1"}
 means an 8 bit logical value.
+
+The main type \code{'M'} should always be ended with the time unit between square brackets
+for storing the date time. A valid code would be \verb{"<M8[h]}.
 
 For more details about dtypes see
 \href{https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html}{ZARR V2.0}}
