@@ -16,7 +16,6 @@ if (!"py_env" %in% list.dirs(Sys.getenv("RETICULATE_VIRTUALENV_ROOT"),
 }
 
 use_virtualenv("py_env")
-
 data_types <-
   dplyr::tibble(
   string_representation =
@@ -30,8 +29,10 @@ data_types <-
       "-1.43e-6, -9871., -12.",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
-      "0, 1"),
-  dtype = c(">i4", "<i4", ">f2", "<f2", ">f4", "<f4", ">f8", "<f8", ">c16", "<c16", "|b1")
+      "0, 1",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'"),
+  dtype = c(">i4", "<i4", ">f2", "<f2", ">f4", "<f4", ">f8", "<f8", ">c16", "<c16", "|b1", "<M8[s]", ">M8[s]")
 )
 
 dtypes <-
@@ -56,7 +57,14 @@ data_types <-
                                   \(i) dtypes[[i]]$tobytes() |> as.raw()),
       r_representation   = lapply(letters[seq_len(nrow(data_types))],
                                   \(i) dtypes[[i]] |> py_to_r())
-    )
+    ) |>
+      dplyr::mutate(
+        r_representation   = lapply(r_representation, \(x) {
+          if (inherits(x, "POSIXt")) {
+            as.POSIXct(x, tz = "UTC")
+          } else x
+        })
+      )
   )
 
 save(data_types,
