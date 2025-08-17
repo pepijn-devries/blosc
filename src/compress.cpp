@@ -3,16 +3,6 @@
 
 using namespace cpp11;
 
-[[cpp11::register]]
-std::string blosc_version() {
-  return std::string(BLOSC_VERSION_STRING);
-}
-
-[[cpp11::register]]
-int nthreads() {
-  return blosc_get_nthreads();
-}
-
 raws blosc_compress_internal(uint8_t *p, R_xlen_t s, std::string compressor,
                              int level, int doshuffle, int typesize) {
   writable::raws result(s + BLOSC_MAX_OVERHEAD);

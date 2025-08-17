@@ -19,7 +19,13 @@ use_virtualenv("py_env")
 data_types <-
   dplyr::tibble(
   string_representation =
-    c("-127, 128, 129, 67305985",
+    c("127, 126, 123, 1",
+      "127, 128, 129, 4432",
+      "127, 128, 129, 4432",
+      "-127, 126, 123, 1",
+      "-127, 128, 129, 4432",
+      "-127, 128, 129, 4432",
+      "-127, 128, 129, 67305985",
       "-127, 128, 129, 67305985",
       "-1.43e-6, -9871., -12.",
       "-1.43e-6, -9871., -12.",
@@ -29,12 +35,22 @@ data_types <-
       "-1.43e-6, -9871., -12.",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
       "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
+      "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
+      "-1.43e-9+1.2j, -9871.+1.2j, -12.+1.2j",
       "0, 1",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
+      "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
       "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
       "'2024-08-01 23:13:38', '2024-08-15', '2024-09-01'",
       "0, 1, 20",
       "0, 1, 30"),
-  dtype = c(">i4", "<i4", ">f2", "<f2", ">f4", "<f4", ">f8", "<f8", ">c16", "<c16", "|b1", "<M8[ms]", ">M8[ms]", "<m8[D]", ">m8[D]")
+  dtype = c("|u1", ">u2", "<u2", "|i1", ">i2", "<i2", ">i4", "<i4",
+            ">f2", "<f2", ">f4", "<f4", ">f8", "<f8",
+            ">c8", "<c8", ">c16", "<c16",
+            "|b1", "<M8[ms]", ">M8[ms]", "<M8[Y]", ">M8[Y]", "<M8[M]", ">M8[M]", "<m8[D]",
+            ">m8[D]")
 )
 
 dtypes <-
@@ -42,8 +58,8 @@ dtypes <-
     paste(
       c(
         "import numpy as np",
-        sprintf("%s = np.array([%s], dtype=\"%s\")",
-                letters[seq_len(nrow(data_types))],
+        sprintf("val%02i = np.array([%s], dtype=\"%s\")",
+                seq_len(nrow(data_types)),
                 data_types$string_representation,
                 data_types$dtype)),
       collapse = "\n"
@@ -55,9 +71,9 @@ data_types <-
   dplyr::bind_cols(
     data_types,
     dplyr::tibble(
-      raw_representation = lapply(letters[seq_len(nrow(data_types))],
-                                  \(i) dtypes[[i]]$tobytes() |> as.raw()),
-      r_representation   = lapply(letters[seq_len(nrow(data_types))],
+      raw_representation = lapply(seq_len(nrow(data_types)),
+                                  \(i) dtypes[[sprintf("val%02i", i)]]$tobytes() |> as.raw()),
+      r_representation   = lapply(sprintf("val%02i", seq_len(nrow(data_types))),
                                   \(i) dtypes[[i]] |> py_to_r())
     ) |>
       dplyr::mutate(

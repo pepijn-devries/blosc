@@ -51,3 +51,9 @@ test_that("size of raw data should be multitude of dtype", {
     dtype_to_r(raw(5), "<f2")
   })
 })
+
+test_that("difftime should always have type 'm'", {
+  expect_error({
+    r_to_dtype(as.difftime(1, units = "hours"), dtype = "<f2")
+  })
+})
