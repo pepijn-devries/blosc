@@ -478,7 +478,7 @@ void convert_data(uint8_t *input, int rtype, int n,
         stop("Failed to convert data");
       }
     } else if (rtype == INTSXP) {
-      if (dtype.main_type == 'i') {
+      if (dtype.main_type == 'i' || dtype.main_type == 'u') {
         
         if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
           conv.i8 = (int64_t)INTEGER(na_value)[0]; else {

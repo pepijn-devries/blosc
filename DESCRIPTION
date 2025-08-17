@@ -1,6 +1,6 @@
 Package: blosc
 Title: Compress and Decompress Data Using the BLOSC Library
-Version: 0.0.2.0003
+Version: 0.0.2.0004
 Authors@R: 
     person("Pepijn", "de Vries", role = c("aut", "cre"),
       email = "pepijn.devries@outlook.com",
@@ -18,7 +18,9 @@ Depends:
     R (>= 4.3)
 Suggests:
     dplyr,
+    knitr,
     reticulate,
+    rmarkdown,
     testthat (>= 3.0.0)
 LinkingTo:
     cpp11
@@ -26,3 +28,4 @@ URL: https://pepijn-devries.github.io/blosc/, https://github.com/pepijn-devries/
 BugReports: https://github.com/pepijn-devries/blosc/issues
 SystemRequirements: blosc: blosc-devel (rpm) or libblosc-dev (deb)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
