@@ -64,6 +64,7 @@
 #' r_to_dtype(c(1, 2, 3, NA, 4), dtype = "<i2", na_value = -999)
 #' @export
 r_to_dtype <- function(x, dtype, na_value = NA, ...) {
+  if (inherits(x, "POSIXlt")) x <- as.POSIXct(x)
   r_to_dtype_(x, dtype, na_value)
 }
 
