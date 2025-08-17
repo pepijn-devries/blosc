@@ -31,3 +31,17 @@ test_that("Decoding works as expected", {
     !result
   })
 })
+
+test_that("POSXlt is accepted", {
+  expect_true({
+    all(r_to_dtype(as.POSIXlt("2000-01-01", tz = "UTC"), "<M8[h]") == 
+          as.raw(c(0x38, 0x3, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0)))
+  })
+})
+
+test_that("difftime is accepted", {
+  expect_true({
+    all(r_to_dtype(as.difftime(1, units = "days"), dtype = "<m8[D]") == 
+          as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)))
+  })
+})

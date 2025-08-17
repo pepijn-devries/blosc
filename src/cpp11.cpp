@@ -6,20 +6,6 @@
 #include <R_ext/Visibility.h>
 
 // compress.cpp
-std::string blosc_version();
-extern "C" SEXP _blosc_blosc_version() {
-  BEGIN_CPP11
-    return cpp11::as_sexp(blosc_version());
-  END_CPP11
-}
-// compress.cpp
-int nthreads();
-extern "C" SEXP _blosc_nthreads() {
-  BEGIN_CPP11
-    return cpp11::as_sexp(nthreads());
-  END_CPP11
-}
-// compress.cpp
 raws blosc_compress_dat(raws data, std::string compressor, int level, int doshuffle, int typesize);
 extern "C" SEXP _blosc_blosc_compress_dat(SEXP data, SEXP compressor, SEXP level, SEXP doshuffle, SEXP typesize) {
   BEGIN_CPP11
@@ -59,10 +45,8 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_blosc_blosc_compress_dat",   (DL_FUNC) &_blosc_blosc_compress_dat,   5},
     {"_blosc_blosc_decompress_dat", (DL_FUNC) &_blosc_blosc_decompress_dat, 1},
-    {"_blosc_blosc_version",        (DL_FUNC) &_blosc_blosc_version,        0},
     {"_blosc_dtype_to_list_",       (DL_FUNC) &_blosc_dtype_to_list_,       1},
     {"_blosc_dtype_to_r_",          (DL_FUNC) &_blosc_dtype_to_r_,          3},
-    {"_blosc_nthreads",             (DL_FUNC) &_blosc_nthreads,             0},
     {"_blosc_r_to_dtype_",          (DL_FUNC) &_blosc_r_to_dtype_,          3},
     {NULL, NULL, 0}
 };
