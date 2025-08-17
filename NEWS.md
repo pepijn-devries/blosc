@@ -1,6 +1,6 @@
 # blosc 0.0.2.0003
 
-* Added support for date-time objects
+* Added support for date-time and delta time objects
 * Improved test coverage
 
 # blosc 0.0.2

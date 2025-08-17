@@ -21,6 +21,14 @@ static const double to_seconds[] {
   604800, 86400, 3600, 60, 1, 1e-3, 1e-6, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18
 };
 
+static const char *difftime_units[] = {
+  "weeks", "days", "hours", "mins", "secs"
+};
+
+static const char *difftime_units_cor[] = {
+  "W", "D", "h", "m", "s"
+};
+
 typedef struct {
   bool needs_byteswap;
   char main_type;
@@ -133,7 +141,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
       stop("Unknown data type '%s'", dtype.c_str());
     if (dt.main_type == 'c' && dt.byte_size != 8 && dt.byte_size != 16)
       stop("Unknown data type '%s'", dtype.c_str());
-    if (dt.main_type == 'M' && dt.byte_size != 8)
+    if ((dt.main_type == 'M' || dt.main_type == 'm') && dt.byte_size != 8)
       stop("Unknown data type '%s'", dtype.c_str());
     
     dt.unit = "";
@@ -148,7 +156,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
     
     dt.unit_conversion = -1;
     if (dt.unit.length() > 0) {
-      if (dt.main_type == 'M') {
+      if (dt.main_type == 'M' || dt.main_type == 'm') {
         for (int j = 0; j < (int)std::size(dt_units); j++) {
           if (dt.unit == dt_units[j]) {
             dt.unit_conversion = to_seconds[j];
@@ -235,16 +243,13 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
     result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
-  } else if((dt.main_type == 'f' || dt.main_type == 'M') &&
+  } else if((dt.main_type == 'f' || dt.main_type == 'M' || dt.main_type == 'm') &&
     dt.byte_size <= 8) {
     result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
     mult_factor = 2;
     result = writable::doubles((R_xlen_t) 2 * n);
-    dest = (uint8_t *)REAL(result);
-  } else if (dt.main_type == 'M' && dt.byte_size == 8) {
-    result = writable::doubles((R_xlen_t) n);
     dest = (uint8_t *)REAL(result);
   } else {
     stop("Cannot convert data type to an R type");
@@ -280,7 +285,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     result.attr("class") = writable::strings({"POSIXct", "POSIXt"});
     result.attr("tzone") = writable::strings((r_string)"UTC");
     double *d = REAL(result);
-      
+
     for (int j = 0; j < n; j++) {
       memcpy(&bigint, (int64_t *)(&(d[j])), sizeof(double));
       if (dt.unit_conversion > 0) {
@@ -298,6 +303,44 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
           stop("Unit conversion not possible/implemented");
         }
       }
+    }
+  } else if (dt.main_type == 'm') {
+    result.attr("class") = writable::strings((r_string)"difftime");
+    writable::strings unts((R_xlen_t)1);
+    int target_unit = -1;
+    double unt_conv = 1;
+    for (int j = 0; j < (int)std::size(difftime_units_cor); j ++) {
+      if (difftime_units_cor[j] == dt.unit) {
+        target_unit = j;
+        break;
+      }
+    }
+    int start = -1, end = -1;
+    if (target_unit < 0) {
+      
+      for (int j = (int)std::size(dt_units) - 1; j >= 0; j--) {
+        if (dt.unit == dt_units[j]) start = j;
+        for (int k = 0; k < (int)std::size(difftime_units_cor); k++) {
+          if (difftime_units_cor[k] == dt_units[j]) {
+            target_unit = k;
+            end = j;
+            break;
+          }
+        }
+        if (target_unit >= 0) break;
+      }
+      unt_conv = to_seconds[end]/to_seconds[start];
+    }
+    
+    if (target_unit < 0) stop("Failed to convert to appropriate unit");
+    unts[0] = difftime_units[target_unit];
+    result.attr("units") = unts;
+
+    double *d = REAL(result);
+    
+    for (int j = 0; j < n; j++) {
+      memcpy(&bigint, (int64_t *)(&(d[j])), sizeof(double));
+      if (!R_IsNA(d[j])) d[j] = ((double)bigint) * unt_conv;
     }
   }
   if (warn) warning("Data contains values equal to R's NA representation");
@@ -371,7 +414,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       d = double(f);
     } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
       d = (double)(*input).f4;
-    } else if ((dtype.main_type == 'f' || dtype.main_type == 'M') &&
+    } else if ((dtype.main_type == 'f' || dtype.main_type == 'M' || dtype.main_type == 'm') &&
       dtype.byte_size == 8) {
       d = (*input).f8;
     } else if (dtype.main_type == 'c' && dtype.byte_size == 8) {
@@ -384,11 +427,14 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     
     if (!ignore_na) {
       double nval = REAL(na_value)[0];
-      if (dtype.main_type == 'M') {
+      if (dtype.main_type == 'M' || dtype.main_type == 'm') {
         int64_t na_cor;
         memcpy(&na_cor, (int64_t *)(&NA_REAL), sizeof(double));
-        
-        int64_t bigint = nval / dtype.unit_conversion;
+        int64_t bigint;
+        if (dtype.main_type == 'm')
+          bigint = nval;
+        else
+          bigint = nval / dtype.unit_conversion;
         memcpy(&nval, (double *)(&bigint), sizeof(double));
         if ((*input).i8 == na_cor && bigint != na_cor) warn_na = true;
         if ((*input).i8 == bigint) d = NA_REAL;
@@ -484,14 +530,18 @@ void convert_data(uint8_t *input, int rtype, int n,
             if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
               warn_na = true;
           }
-      } else if (dtype.main_type == 'M' && dtype.byte_size == 8) {
+      } else if ((dtype.main_type == 'M' || dtype.main_type == 'm') &&
+        dtype.byte_size == 8) {
         
         if (!ignore_na && R_IsNA(((double *)input)[i])) {
           conv.f8 = REAL(na_value)[0];
         } else {
           conv.f8 = ((double *)input)[i];
         }
-        if (dtype.unit_conversion > 0) {
+        if (dtype.main_type == 'm') {
+          bigint = conv.f8;
+          memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
+        } else if (dtype.unit_conversion > 0) {
           bigint = conv.f8/dtype.unit_conversion;
           memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
         } else {
@@ -585,7 +635,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
     data = Rf_coerceVector(data, REALSXP);
     ptr_in = (uint8_t *)REAL(data);
-  } else if((dt.main_type == 'f' || dt.main_type == 'M') &&
+  } else if((dt.main_type == 'f' || dt.main_type == 'M' || dt.main_type == 'm') &&
     dt.byte_size <= 8) {
     data = Rf_coerceVector(data, REALSXP);
     ptr_in = (uint8_t *)REAL(data);

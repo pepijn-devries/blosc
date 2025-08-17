@@ -23,14 +23,15 @@
 #' 
 #' The second character represents the main data type (`'b'` boolean (logical),
 #' `'i'` signed integer, `'u'` unsigned integer, `'f'` floating point number,
-#' `'c'` complex number). `'M'` is used for date-time objects.
+#' `'c'` complex number). `'M'` is used for date-time objects and `'m'` for delta
+#' time (see [difftime()]).
 #' 
 #' The following characters are numerical indicating the byte size of the data type.
 #' For example: `dtype = "<f4"` means a 32 bit floating point number; `dtype = "|b1"`
 #' means an 8 bit logical value.
 #' 
-#' The main type `'M'` should always be ended with the time unit between square brackets
-#' for storing the date time. A valid code would be `"<M8[h]`.
+#' The main types `'M'` and `'m'` should always be ended with the time unit between
+#' square brackets for storing the date time (difference). A valid code would be `"<M8[h]`.
 #' 
 #' For more details about dtypes see
 #' [ZARR V2.0](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html)
@@ -65,6 +66,11 @@
 #' @export
 r_to_dtype <- function(x, dtype, na_value = NA, ...) {
   if (inherits(x, "POSIXlt")) x <- as.POSIXct(x)
+  if (inherits(x, "difftime")) {
+    dt = dtype_to_list_(dtype)
+    if (dt$main_type != "m") stop("Incompatible type between `x` and `dtype`")
+    x <- as.numeric(x, "secs") / dt$unit_conversion
+  }
   r_to_dtype_(x, dtype, na_value)
 }
 
