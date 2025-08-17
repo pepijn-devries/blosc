@@ -9,7 +9,7 @@ convert between R native types and raw data."><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.0003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.0004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,6 +18,10 @@ convert between R native types and raw data."><meta property="og:image" content=
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/dtypes.html">Data Types</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -69,7 +73,8 @@ means an 8 bit logical value.</p>
 <p>The main types <code>'M'</code> and <code>'m'</code> should always be ended with the time unit between
 square brackets for storing the date time (difference). A valid code would be <code>"&lt;M8[h]</code>.</p>
 <p>For more details about dtypes see
-<a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html" class="external-link">ZARR V2.0</a></p></dd>
+<a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html" class="external-link">ZARR V2.0</a>
+or <code>\vignette("dtypes")</code>.</p></dd>
 
 
 <dt id="arg-na-value">na_value<a class="anchor" aria-label="anchor" href="#arg-na-value"></a></dt>
@@ -79,7 +84,8 @@ Other software may use different values to represent missing values. Also,
 some data types have insufficient storage capacity to store <code>R</code> <code>NA</code> values.</p>
 <p>Therefore, you can use this argument to indicate which value should represent
 missing values. By default it uses <code>R</code> <code>NA</code>. When set to <code>NULL</code>, missing values
-are just processed as is, without any further notice or warning.</p></dd>
+are just processed as is, without any further notice or warning.</p>
+<p>For more details see <code>\vignette("dtypes")</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -104,6 +110,7 @@ more complex classes, but those are generally derivatives of the aforementioned 
 <p>The functions documented here will attempt to convert raw data to R types (or vice versa).
 As not all 'dtypes' have an appropriate R type counterpart, some conversions will not
 be possible directly and will result in an error.</p>
+<p>For more details see <code>\vignette("dtypes")</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
