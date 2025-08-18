@@ -8,7 +8,7 @@
 #' In case of `blosc_compress()`, `x` should either be `raw` data or a
 #' `vector` of data to be compressed. In the latter case, you need to specify
 #' `dtype` (see `r_to_dtype()`) in order to convert the data to `raw` information
-#' first. See `\vignette("blosc")` for more details.
+#' first. See `vignette("blosc")` for more details.
 #' @param compressor The compression algorithm to be used. Can be any of
 #' `"blosclz"`, `"lz4"`, `"lz4hc"`, `"zlib"`, or `"zstd"`.
 #' @param level An `integer` indicating the required level of compression.

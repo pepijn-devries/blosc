@@ -42,7 +42,7 @@ Can you compress other data types with Blosc? Yes you can. You first have
 to encode it to a binary form (`raw()`), with for instance `r_to_dtype()` or
 any other method that converts your data into a `raw()` format. You can
 also use the `dtype` argument to encode and compress your data in one go.
-In that case you need to specify an appropriate data type (`\vignette("dtypes")`).
+In that case you need to specify an appropriate data type (`vignette("dtypes")`).
 
 The example below shows how to encode `numeric()` values as
 little-endian 16 bit floating point data (`"<f2"`) and compresses it.

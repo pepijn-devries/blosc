@@ -16,7 +16,7 @@
 #' As not all 'dtypes' have an appropriate R type counterpart, some conversions will not
 #' be possible directly and will result in an error.
 #' 
-#' For more details see `\vignette("dtypes")`.
+#' For more details see `vignette("dtypes")`.
 #' @param x Object to be converted
 #' @param dtype The data type used for encoding/decoding raw data. The `dtype` is
 #' a code consisting of at least 3 characters. The first character indicates the
@@ -37,7 +37,7 @@
 #' 
 #' For more details about dtypes see
 #' [ZARR V2.0](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html)
-#' or `\vignette("dtypes")`.
+#' or `vignette("dtypes")`.
 #' @param na_value When storing raw data, you may want to reserve a value to
 #' represent missing values. This is also what `R` does for `NA` values.
 #' Other software may use different values to represent missing values. Also,
@@ -47,7 +47,7 @@
 #' missing values. By default it uses `R` `NA`. When set to `NULL`, missing values
 #' are just processed as is, without any further notice or warning.
 #' 
-#' For more details see `\vignette("dtypes")`.
+#' For more details see `vignette("dtypes")`.
 #' @param ... Ignored
 #' @returns In case of `r_to_dtype()` a vector of encoded `raw` data is returned.
 #' In case of `dtype_to_r()` a vector of an R type (appropriate for the specified `dtype`)
