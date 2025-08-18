@@ -31,7 +31,7 @@ square brackets for storing the date time (difference). A valid code would be \v
 
 For more details about dtypes see
 \href{https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html}{ZARR V2.0}
-or \verb{\\vignette("dtypes")}.}
+or \code{vignette("dtypes")}.}
 
 \item{na_value}{When storing raw data, you may want to reserve a value to
 represent missing values. This is also what \code{R} does for \code{NA} values.
@@ -42,7 +42,7 @@ Therefore, you can use this argument to indicate which value should represent
 missing values. By default it uses \code{R} \code{NA}. When set to \code{NULL}, missing values
 are just processed as is, without any further notice or warning.
 
-For more details see \verb{\\vignette("dtypes")}.}
+For more details see \code{vignette("dtypes")}.}
 
 \item{...}{Ignored}
 }
@@ -69,7 +69,7 @@ The functions documented here will attempt to convert raw data to R types (or vi
 As not all 'dtypes' have an appropriate R type counterpart, some conversions will not
 be possible directly and will result in an error.
 
-For more details see \verb{\\vignette("dtypes")}.
+For more details see \code{vignette("dtypes")}.
 }
 \examples{
 ## Encode volcano data to 16 bit floating point values

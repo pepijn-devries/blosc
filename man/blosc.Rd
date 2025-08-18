@@ -24,7 +24,7 @@ to a specific data type.
 In case of \code{blosc_compress()}, \code{x} should either be \code{raw} data or a
 \code{vector} of data to be compressed. In the latter case, you need to specify
 \code{dtype} (see \code{r_to_dtype()}) in order to convert the data to \code{raw} information
-first. See \verb{\\vignette("blosc")} for more details.}
+first. See \code{vignette("blosc")} for more details.}
 
 \item{compressor}{The compression algorithm to be used. Can be any of
 \code{"blosclz"}, \code{"lz4"}, \code{"lz4hc"}, \code{"zlib"}, or \code{"zstd"}.}
