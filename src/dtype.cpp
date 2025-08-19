@@ -469,8 +469,9 @@ bool convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'b') {
         
         if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-          conv.i1 = 0xff & INTEGER(new_na_value)[0]; else
-            conv.b1 = (bool)((int *)input)[i];
+          // TODO maybe this is undefined behaviour? assigning int to int8_t?
+          conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
+            conv.b1 = (((int *)input)[i] != 0);
           if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
             warn_na = true;
           
@@ -620,6 +621,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   
   int n = LENGTH(data);
   uint8_t *ptr_in;
+  //TODO or is this coercing leading to undefined behaviour?
   if (dt.main_type == 'b' && dt.byte_size == 1) {
     data = Rf_coerceVector(data, LGLSXP);
     ptr_in = (uint8_t *)LOGICAL(data);
@@ -649,7 +651,6 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
   bool warn_na = convert_data(ptr_in, TYPEOF(data), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  // This warning seems to cause a lot of fuzz in UBSAN:
   if (warn_na) warning("Data contains values equal to the value representing missing values!");
   
   return result;

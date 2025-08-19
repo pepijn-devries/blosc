@@ -98,7 +98,7 @@ Some examples of encoding r data to dtypes
 
 ```{r encoding}
 library(blosc)
-# r_to_dtype(c(TRUE, FALSE), "|b1")
+r_to_dtype(c(TRUE, FALSE), "|b1")
 r_to_dtype(1L:4L, "|u1")
 r_to_dtype(c(1.4, 9.8e-6), "<f8")
 r_to_dtype(1+1i, "<c16")
