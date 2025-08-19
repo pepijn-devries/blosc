@@ -64,7 +64,7 @@ union conversion_t {
   complex64 c16;
 };
 
-void convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype,
+bool convert_data(uint8_t *input, int rtype, int n, blosc_dtype dtype,
                   uint8_t *output, sexp na_value);
 bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value);
@@ -453,7 +453,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
   return warn_na;
 }
 
-void convert_data(uint8_t *input, int rtype, int n,
+bool convert_data(uint8_t *input, int rtype, int n,
                   blosc_dtype dtype, uint8_t *output, sexp na_value) {
   sexp new_na_value = check_na(na_value, rtype);
   bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
@@ -609,7 +609,7 @@ void convert_data(uint8_t *input, int rtype, int n,
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
-  if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  return warn_na;
 }
 
 [[cpp11::register]]
@@ -647,8 +647,11 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
   uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  convert_data(ptr_in, TYPEOF(data), n, dt, ptr, na_value);
+  bool warn_na = convert_data(ptr_in, TYPEOF(data), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
+  // This warning seems to cause a lot of fuzz in UBSAN:
+  if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  
   return result;
 }
 
