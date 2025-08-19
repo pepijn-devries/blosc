@@ -362,16 +362,16 @@ sexp check_na(sexp na_value, int rtype) {
 bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value) {
   bool ignore_na = Rf_isNull(na_value), warn_na = false;
-  na_value = check_na(na_value, rtype);
+  sexp new_na_value = check_na(na_value, rtype);
   
   if (rtype == LGLSXP) {
     if (dtype.main_type == 'b' && dtype.byte_size == 1) {
       int b = (int)(*input).b1;
       if (!ignore_na) {
-        int nval = INTEGER(na_value)[0];
+        int nval = INTEGER(new_na_value)[0];
         if (nval != NA_INTEGER) nval = 0xff & nval;
-        if (b == NA_INTEGER && !ISNA(na_value)) warn_na = true;
-        if (b ==(0xff & INTEGER(na_value)[0])) b = NA_LOGICAL;
+        if (b == NA_INTEGER && !ISNA(new_na_value)) warn_na = true;
+        if (b ==(0xff & INTEGER(new_na_value)[0])) b = NA_LOGICAL;
       }
       memcpy(output, &b, sizeof(int));
       
@@ -395,7 +395,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     }
     
     if (!ignore_na) {
-      int nval = INTEGER(na_value)[0];
+      int nval = INTEGER(new_na_value)[0];
       if (i == NA_INTEGER && nval != NA_INTEGER) warn_na = true;
       if (i == nval) i = NA_INTEGER;
     }
@@ -426,7 +426,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     }
     
     if (!ignore_na) {
-      double nval = REAL(na_value)[0];
+      double nval = REAL(new_na_value)[0];
       if (dtype.main_type == 'M' || dtype.main_type == 'm') {
         int64_t na_cor;
         memcpy(&na_cor, (int64_t *)(&NA_REAL), sizeof(double));
@@ -455,8 +455,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
 
 void convert_data(uint8_t *input, int rtype, int n,
                   blosc_dtype dtype, uint8_t *output, sexp na_value) {
-  na_value = check_na(na_value, rtype);
-  bool warn_na = false, ignore_na = Rf_isNull(na_value);
+  sexp new_na_value = check_na(na_value, rtype);
+  bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
   conversion_t empty, conv;
   complex64 cempty;
   cempty.real = 0.0;
@@ -469,9 +469,9 @@ void convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'b') {
         
         if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-          conv.i1 = 0xff & INTEGER(na_value)[0]; else
+          conv.i1 = 0xff & INTEGER(new_na_value)[0]; else
             conv.b1 = (bool)((int *)input)[i];
-          if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
+          if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
             warn_na = true;
           
       } else {
@@ -481,9 +481,9 @@ void convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'i' || dtype.main_type == 'u') {
         
         if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
-          conv.i8 = (int64_t)INTEGER(na_value)[0]; else {
+          conv.i8 = (int64_t)INTEGER(new_na_value)[0]; else {
             conv.i8 = (int64_t)((int *)input)[i];
-            if (!ignore_na && ((int *)input)[i] == INTEGER(na_value)[0])
+            if (!ignore_na && ((int *)input)[i] == INTEGER(new_na_value)[0])
               warn_na = true;
           }
           
@@ -494,9 +494,9 @@ void convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'i') {
         
         if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.i8 = (int64_t)REAL(na_value)[0]; else {
+          conv.i8 = (int64_t)REAL(new_na_value)[0]; else {
             conv.i8 = (int64_t)((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
               warn_na = true;
           }
           
@@ -505,9 +505,9 @@ void convert_data(uint8_t *input, int rtype, int n,
         float16 f;
         
         if (!ignore_na && R_IsNA(((double *)input)[i]))
-          f = REAL(na_value)[0]; else {
+          f = REAL(new_na_value)[0]; else {
             f = ((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
               warn_na = true;
           }
           
@@ -516,25 +516,25 @@ void convert_data(uint8_t *input, int rtype, int n,
       } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
         
         if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.f4 = (float)REAL(na_value)[0]; else {
+          conv.f4 = (float)REAL(new_na_value)[0]; else {
             conv.f4 = (float)((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
               warn_na = true;
           }
           
       } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
         
         if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.f8 = REAL(na_value)[0]; else {
+          conv.f8 = REAL(new_na_value)[0]; else {
             conv.f8 = ((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(na_value)[0])
+            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
               warn_na = true;
           }
       } else if ((dtype.main_type == 'M' || dtype.main_type == 'm') &&
         dtype.byte_size == 8) {
         
         if (!ignore_na && R_IsNA(((double *)input)[i])) {
-          conv.f8 = REAL(na_value)[0];
+          conv.f8 = REAL(new_na_value)[0];
         } else {
           conv.f8 = ((double *)input)[i];
         }
@@ -558,7 +558,7 @@ void convert_data(uint8_t *input, int rtype, int n,
             stop("Unable to convert unit");
           }
         }
-        if (!ignore_na && conv.f8 == REAL(na_value)[0])
+        if (!ignore_na && conv.f8 == REAL(new_na_value)[0])
           warn_na = true;
         
           
@@ -573,7 +573,7 @@ void convert_data(uint8_t *input, int rtype, int n,
           double re = ((double *)input)[2*i];
           double im = ((double *)input)[2*i + 1];
           Rcomplex c;
-          if (!ignore_na) c = COMPLEX(na_value)[0];
+          if (!ignore_na) c = COMPLEX(new_na_value)[0];
           if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
             conv.c8.real = (float)c.r;
             conv.c8.imaginary = (float)c.i;
@@ -589,7 +589,7 @@ void convert_data(uint8_t *input, int rtype, int n,
           double re = ((double *)input)[2*i];
           double im = ((double *)input)[2*i + 1];
           Rcomplex c;
-          if (!ignore_na) c = COMPLEX(na_value)[0];
+          if (!ignore_na) c = COMPLEX(new_na_value)[0];
           if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
             conv.c16.real = c.r;
             conv.c16.imaginary = c.i;
