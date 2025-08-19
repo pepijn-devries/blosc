@@ -48,7 +48,7 @@ typedef struct {
 } complex64;
 
 union conversion_t {
-  bool      b1;
+  int8_t    b1;
   uint8_t   u1;
   int8_t    i1;
   uint16_t  u2;
@@ -366,7 +366,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
   
   if (rtype == LGLSXP) {
     if (dtype.main_type == 'b' && dtype.byte_size == 1) {
-      int b = (int)((bool)(*input).b1);
+      int b = (int)((int8_t)(*input).b1);
       if (!ignore_na) {
         int nval = INTEGER(new_na_value)[0];
         if (nval != NA_INTEGER) nval = 0xff & nval;
