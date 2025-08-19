@@ -96,7 +96,7 @@ The table below shows an overview of common types, how the are converted from an
 
 Some examples of encoding r data to dtypes
 
-```{r encoding}
+```{r encoding, eval=FALSE}
 library(blosc)
 r_to_dtype(c(TRUE, FALSE), "|b1")
 r_to_dtype(1L:4L, "|u1")
@@ -117,7 +117,7 @@ This will become apparent when you convert your dtype back to an `R` type.
 
 Some examples where you will lose precision:
 
-```{r precision}
+```{r precision, eval=FALSE}
 ## Encoding numeric (64 bit) as a 16 bit float:
 r_to_dtype(0.123, "<f2") |>
   dtype_to_r("<f2")
