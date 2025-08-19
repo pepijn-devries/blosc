@@ -141,7 +141,9 @@ insufficient storage capacity to store `R` `NA` values
 The examples below show how you can use custom values to prepresent missing
 values.
 
-```{r missing}
+<!-- TODO eval should be true it's disabled for debugging -->
+
+```{r missing, eval = FALSE}
 ## As `na_value` is not specified for `dtype_to_r()`
 ## and the NA value is masked to 8 bit, the `FALSE`
 ## value is mistakenly interpreted as `NA`

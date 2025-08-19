@@ -607,8 +607,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
         stop("Failed to convert data");
       }
     }
-    //TODO disabled for debugging purposes
-    //memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
+    memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
   return warn_na;
 }
