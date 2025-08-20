@@ -353,8 +353,22 @@ sexp check_na(sexp na_value, int rtype) {
     if (!Rf_isVector(na_value)) stop("Invalid NA value");
     int rt = rtype;
     if (rtype == LGLSXP) rt = INTSXP;
-    result = Rf_coerceVector(na_value, rt);
-    if (LENGTH(result) != 1) stop("Invalid NA value");
+    if (rtype == CPLXSXP) rt = REALSXP;
+    if (LENGTH(na_value) != 1) stop("Invalid NA value");
+    sexp r = PROTECT(Rf_coerceVector(na_value, rt));
+    if (rt == INTSXP) {
+      writable::integers temp((R_xlen_t)1);
+      temp[0] = INTEGER(r)[0];
+      result = temp;
+    } else if (rt == REALSXP) {
+      writable::doubles temp((R_xlen_t)1);
+      temp[0] = REAL(r)[0];
+      result = temp;
+    } else {
+      UNPROTECT(1);
+      stop("Incompatible type for `na_value`");
+    }
+    UNPROTECT(1);
   }
   return result;
 }
@@ -455,6 +469,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
 
 bool convert_data(uint8_t *input, int rtype, int n,
                   blosc_dtype dtype, uint8_t *output, sexp na_value) {
+
   sexp new_na_value = check_na(na_value, rtype);
   bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
   conversion_t empty, conv;
@@ -469,7 +484,6 @@ bool convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'b') {
         
         if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-          // TODO maybe this is undefined behaviour? assigning int to int8_t?
           conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
             conv.b1 = (((int *)input)[i] != 0);
           if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
@@ -489,6 +503,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
           }
           
       } else {
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     } else if (rtype == REALSXP) {
@@ -556,6 +571,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
             memcpy(&conv.f8, (double *)(&mon), sizeof(double));
 
           } else {
+            UNPROTECT(1); // Input data for this function is protected
             stop("Unable to convert unit");
           }
         }
@@ -564,6 +580,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
         
           
       } else {
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     } else if (rtype == CPLXSXP) {
@@ -574,14 +591,13 @@ bool convert_data(uint8_t *input, int rtype, int n,
           double re = ((double *)input)[2*i];
           double im = ((double *)input)[2*i + 1];
           Rcomplex c;
-          if (!ignore_na) c = COMPLEX(new_na_value)[0];
           if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
-            conv.c8.real = (float)c.r;
-            conv.c8.imaginary = (float)c.i;
+            conv.c8.real = (float)REAL(new_na_value)[0];
+            conv.c8.imaginary = (float)REAL(new_na_value)[0];
           } else {
             conv.c8.real      = (float)re;
             conv.c8.imaginary = (float)im;
-            if (!ignore_na && re == c.r && im == c.i)
+            if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
               warn_na = true;
           }
           
@@ -589,22 +605,22 @@ bool convert_data(uint8_t *input, int rtype, int n,
           
           double re = ((double *)input)[2*i];
           double im = ((double *)input)[2*i + 1];
-          Rcomplex c;
-          if (!ignore_na) c = COMPLEX(new_na_value)[0];
           if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
-            conv.c16.real = c.r;
-            conv.c16.imaginary = c.i;
+            conv.c16.real = REAL(new_na_value)[0];
+            conv.c16.imaginary = REAL(new_na_value)[0];
           } else {
             conv.c16.real      = re;
             conv.c16.imaginary = im;
-            if (!ignore_na && re == c.r && im == c.i)
+            if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
               warn_na = true;
           }
           
         } else {
+          UNPROTECT(1); // Input data for this function is protected
           stop("Failed to convert data");
         }
       } else {
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     }
@@ -618,41 +634,41 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   blosc_dtype dt = prepare_dtype(dtype);
   
   if (!Rf_isVector(data)) stop("Input data is not a vector!");
-  
+  sexp dat;
+
   int n = LENGTH(data);
   uint8_t *ptr_in;
-  //TODO or is this coercing leading to undefined behaviour?
   if (dt.main_type == 'b' && dt.byte_size == 1) {
-    data = Rf_coerceVector(data, LGLSXP);
-    ptr_in = (uint8_t *)LOGICAL(data);
+    dat = PROTECT(Rf_coerceVector(data, LGLSXP));
+    ptr_in = (uint8_t *)LOGICAL(dat);
   } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
-    data = Rf_coerceVector(data, INTSXP);
-    ptr_in = (uint8_t *)INTEGER(data);
+    dat = PROTECT(Rf_coerceVector(data, INTSXP));
+    ptr_in = (uint8_t *)INTEGER(dat);
   } else if(dt.main_type == 'i' && dt.byte_size >4 && dt.byte_size <= 8) {
-    data = Rf_coerceVector(data, REALSXP);
-    ptr_in = (uint8_t *)REAL(data);
+    dat = PROTECT(Rf_coerceVector(data, REALSXP));
+    ptr_in = (uint8_t *)REAL(dat);
   } else if(dt.main_type == 'u' && dt.byte_size <= 3) {
-    data = Rf_coerceVector(data, INTSXP);
-    ptr_in = (uint8_t *)INTEGER(data);
+    dat = PROTECT(Rf_coerceVector(data, INTSXP));
+    ptr_in = (uint8_t *)INTEGER(dat);
   } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
-    data = Rf_coerceVector(data, REALSXP);
-    ptr_in = (uint8_t *)REAL(data);
+    dat = PROTECT(Rf_coerceVector(data, REALSXP));
+    ptr_in = (uint8_t *)REAL(dat);
   } else if((dt.main_type == 'f' || dt.main_type == 'M' || dt.main_type == 'm') &&
     dt.byte_size <= 8) {
-    data = Rf_coerceVector(data, REALSXP);
-    ptr_in = (uint8_t *)REAL(data);
+    dat = PROTECT(Rf_coerceVector(data, REALSXP));
+    ptr_in = (uint8_t *)REAL(dat);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
-    data = Rf_coerceVector(data, CPLXSXP);
+    dat = PROTECT(Rf_coerceVector(data, CPLXSXP));
     ptr_in = (uint8_t *)COMPLEX(data);
   } else {
     stop("Cannot convert data type to an R type");
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
   uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  bool warn_na = convert_data(ptr_in, TYPEOF(data), n, dt, ptr, na_value);
+  bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
   if (warn_na) warning("Data contains values equal to the value representing missing values!");
-  
+  UNPROTECT(1); // unprotect dat
   return result;
 }
 
