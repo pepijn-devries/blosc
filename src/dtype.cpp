@@ -484,12 +484,14 @@ bool convert_data(uint8_t *input, int rtype, int n,
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
-        
-        conv.b1 = (((int *)input)[i] != 0);
+        int value;
+        memcpy(&value, input + i*sizeof(int), sizeof(int));
+        conv.b1 = value != 0;
         // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
         //   conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
         //     conv.b1 = (((int *)input)[i] != 0);
-        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
+        Rprintf("TODO typeof new na %i\n", TYPEOF(new_na_value));
+        if (!ignore_na && (value == (0xff & INTEGER(new_na_value)[0]))
           warn_na = true;
           
       } else {
