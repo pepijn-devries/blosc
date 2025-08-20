@@ -631,8 +631,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
-  //return warn_na; //TODO
-  return false;
+  return warn_na;
 }
 
 [[cpp11::register]]
@@ -674,8 +673,8 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   
   bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  if (warn_na) warning("Data contains values equal to the value representing missing values!");
   UNPROTECT(1); // unprotect dat
+  if (warn_na) warning("Data contains values equal to the value representing missing values!");
   return result;
 }
 
