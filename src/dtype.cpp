@@ -632,45 +632,46 @@ bool convert_data(uint8_t *input, int rtype, int n,
 
 [[cpp11::register]]
 raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
-  blosc_dtype dt = prepare_dtype(dtype);
-  
-  if (!Rf_isVector(data)) stop("Input data is not a vector!");
-  sexp dat;
-
-  int n = LENGTH(data);
-  uint8_t *ptr_in;
-  if (dt.main_type == 'b' && dt.byte_size == 1) {
-    dat = PROTECT(Rf_coerceVector(data, LGLSXP));
-    ptr_in = (uint8_t *)LOGICAL(dat);
-  } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
-    dat = PROTECT(Rf_coerceVector(data, INTSXP));
-    ptr_in = (uint8_t *)INTEGER(dat);
-  } else if(dt.main_type == 'i' && dt.byte_size >4 && dt.byte_size <= 8) {
-    dat = PROTECT(Rf_coerceVector(data, REALSXP));
-    ptr_in = (uint8_t *)REAL(dat);
-  } else if(dt.main_type == 'u' && dt.byte_size <= 3) {
-    dat = PROTECT(Rf_coerceVector(data, INTSXP));
-    ptr_in = (uint8_t *)INTEGER(dat);
-  } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
-    dat = PROTECT(Rf_coerceVector(data, REALSXP));
-    ptr_in = (uint8_t *)REAL(dat);
-  } else if((dt.main_type == 'f' || dt.main_type == 'M' || dt.main_type == 'm') &&
-    dt.byte_size <= 8) {
-    dat = PROTECT(Rf_coerceVector(data, REALSXP));
-    ptr_in = (uint8_t *)REAL(dat);
-  } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
-    dat = PROTECT(Rf_coerceVector(data, CPLXSXP));
-    ptr_in = (uint8_t *)COMPLEX(dat);
-  } else {
-    stop("Cannot convert data type to an R type");
-  }
-  writable::raws result((R_xlen_t)n*dt.byte_size);
-  uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
-  if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  if (warn_na) warning("Data contains values equal to the value representing missing values!");
-  UNPROTECT(1); // unprotect dat
-  return result;
+  return(writable::raws({0,0,0,0}));
+  // blosc_dtype dt = prepare_dtype(dtype);
+  // 
+  // if (!Rf_isVector(data)) stop("Input data is not a vector!");
+  // sexp dat;
+  // 
+  // int n = LENGTH(data);
+  // uint8_t *ptr_in;
+  // if (dt.main_type == 'b' && dt.byte_size == 1) {
+  //   dat = PROTECT(Rf_coerceVector(data, LGLSXP));
+  //   ptr_in = (uint8_t *)LOGICAL(dat);
+  // } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
+  //   dat = PROTECT(Rf_coerceVector(data, INTSXP));
+  //   ptr_in = (uint8_t *)INTEGER(dat);
+  // } else if(dt.main_type == 'i' && dt.byte_size >4 && dt.byte_size <= 8) {
+  //   dat = PROTECT(Rf_coerceVector(data, REALSXP));
+  //   ptr_in = (uint8_t *)REAL(dat);
+  // } else if(dt.main_type == 'u' && dt.byte_size <= 3) {
+  //   dat = PROTECT(Rf_coerceVector(data, INTSXP));
+  //   ptr_in = (uint8_t *)INTEGER(dat);
+  // } else if(dt.main_type == 'u' && dt.byte_size <= 7) {
+  //   dat = PROTECT(Rf_coerceVector(data, REALSXP));
+  //   ptr_in = (uint8_t *)REAL(dat);
+  // } else if((dt.main_type == 'f' || dt.main_type == 'M' || dt.main_type == 'm') &&
+  //   dt.byte_size <= 8) {
+  //   dat = PROTECT(Rf_coerceVector(data, REALSXP));
+  //   ptr_in = (uint8_t *)REAL(dat);
+  // } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
+  //   dat = PROTECT(Rf_coerceVector(data, CPLXSXP));
+  //   ptr_in = (uint8_t *)COMPLEX(dat);
+  // } else {
+  //   stop("Cannot convert data type to an R type");
+  // }
+  // writable::raws result((R_xlen_t)n*dt.byte_size);
+  // uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
+  // bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
+  // if (dt.needs_byteswap) byte_swap(ptr, dt, n);
+  // if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  // UNPROTECT(1); // unprotect dat
+  // return result;
 }
 
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
