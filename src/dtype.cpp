@@ -479,7 +479,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
   cempty.real = 0.0;
   cempty.imaginary = 0.0;
   empty.c16 = cempty; // <== an empty conversion type (all bits set to zero)
-  int64_t bigint = 0;
+  //int64_t bigint = 0;
   for (int i = 0; i < n; i++) {
     conv = empty;
     if (rtype == LGLSXP) {
@@ -638,10 +638,10 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   sexp dat;
 
   int n = LENGTH(data);
-  uint8_t *ptr_in;
+//  uint8_t *ptr_in;
   if (dt.main_type == 'b' && dt.byte_size == 1) {
     dat = PROTECT(Rf_coerceVector(data, LGLSXP));
-    ptr_in = (uint8_t *)LOGICAL(dat);
+//    ptr_in = (uint8_t *)LOGICAL(dat);
   // } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
   //   dat = PROTECT(Rf_coerceVector(data, INTSXP));
   //   ptr_in = (uint8_t *)INTEGER(dat);
@@ -665,7 +665,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
     stop("Cannot convert data type to an R type");
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
-  uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
+  //uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
   
   UNPROTECT(1); // TODO
   return writable::raws({0,0,0,0}); //TODO
