@@ -473,7 +473,8 @@ bool convert_data(uint8_t *input, int rtype, int n,
                   blosc_dtype dtype, uint8_t *output, sexp na_value) {
 
   sexp new_na_value = check_na(na_value, rtype);
-  bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
+//  bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
+  bool warn_na = false;
   conversion_t empty, conv;
   complex64 cempty;
   cempty.real = 0.0;
@@ -639,10 +640,10 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   sexp dat;
 
   int n = LENGTH(data);
-//  uint8_t *ptr_in;
+  uint8_t *ptr_in;
   if (dt.main_type == 'b' && dt.byte_size == 1) {
     dat = PROTECT(Rf_coerceVector(data, LGLSXP));
-//    ptr_in = (uint8_t *)LOGICAL(dat);
+    ptr_in = (uint8_t *)LOGICAL(dat);
   // } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
   //   dat = PROTECT(Rf_coerceVector(data, INTSXP));
   //   ptr_in = (uint8_t *)INTEGER(dat);
@@ -666,7 +667,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
     stop("Cannot convert data type to an R type");
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
-  //uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
+  uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
   
   bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
   if (dt.needs_byteswap) byte_swap(ptr, dt, n);
