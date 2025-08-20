@@ -494,136 +494,136 @@ bool convert_data(uint8_t *input, int rtype, int n,
       } else {
         stop("Failed to convert data");
       }
-    } else if (rtype == INTSXP) {
-      if (dtype.main_type == 'i' || dtype.main_type == 'u') {
-        
-        if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
-          conv.i8 = (int64_t)INTEGER(new_na_value)[0]; else {
-            conv.i8 = (int64_t)((int *)input)[i];
-            if (!ignore_na && ((int *)input)[i] == INTEGER(new_na_value)[0])
-              warn_na = true;
-          }
-          
-      } else {
-        UNPROTECT(1); // Input data for this function is protected
-        stop("Failed to convert data");
-      }
-    } else if (rtype == REALSXP) {
-      if (dtype.main_type == 'i') {
-        
-        if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.i8 = (int64_t)REAL(new_na_value)[0]; else {
-            conv.i8 = (int64_t)((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
-              warn_na = true;
-          }
-          
-      } else if (dtype.main_type == 'f' && dtype.byte_size == 2) {
-        
-        float16 f;
-        
-        if (!ignore_na && R_IsNA(((double *)input)[i]))
-          f = REAL(new_na_value)[0]; else {
-            f = ((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
-              warn_na = true;
-          }
-          
-          conv.f2 = f.GetBits();
-          
-      } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
-        
-        if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.f4 = (float)REAL(new_na_value)[0]; else {
-            conv.f4 = (float)((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
-              warn_na = true;
-          }
-          
-      } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
-        
-        if (!ignore_na && R_IsNA(((double *)input)[i]))
-          conv.f8 = REAL(new_na_value)[0]; else {
-            conv.f8 = ((double *)input)[i];
-            if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
-              warn_na = true;
-          }
-      } else if ((dtype.main_type == 'M' || dtype.main_type == 'm') &&
-        dtype.byte_size == 8) {
-        
-        if (!ignore_na && R_IsNA(((double *)input)[i])) {
-          conv.f8 = REAL(new_na_value)[0];
-        } else {
-          conv.f8 = ((double *)input)[i];
-        }
-        if (dtype.main_type == 'm') {
-          bigint = conv.f8;
-          memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
-        } else if (dtype.unit_conversion > 0) {
-          bigint = conv.f8/dtype.unit_conversion;
-          memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
-        } else {
-          int64_t mon, yr;
-          getYM(conv.f8/86400, mon, yr);
-          yr = yr - 1970;
-          if (dtype.unit == "Y") {
-            memcpy(&conv.f8, (double *)(&yr), sizeof(double));
-          } else if (dtype.unit == "M") {
-            mon = yr*12 + mon - 1;
-            memcpy(&conv.f8, (double *)(&mon), sizeof(double));
-
-          } else {
-            UNPROTECT(1); // Input data for this function is protected
-            stop("Unable to convert unit");
-          }
-        }
-        if (!ignore_na && conv.f8 == REAL(new_na_value)[0])
-          warn_na = true;
-        
-          
-      } else {
-        UNPROTECT(1); // Input data for this function is protected
-        stop("Failed to convert data");
-      }
-    } else if (rtype == CPLXSXP) {
-      if (dtype.main_type == 'c') {
-        if (dtype.byte_size == 8) {
-          
-          // In R a complex number is a type consisting of two doubles (r(eal) and i(maginary))
-          double re = ((double *)input)[2*i];
-          double im = ((double *)input)[2*i + 1];
-          if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
-            conv.c8.real = (float)REAL(new_na_value)[0];
-            conv.c8.imaginary = (float)REAL(new_na_value)[0];
-          } else {
-            conv.c8.real      = (float)re;
-            conv.c8.imaginary = (float)im;
-            if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
-              warn_na = true;
-          }
-          
-        } else if (dtype.byte_size == 16) {
-          
-          double re = ((double *)input)[2*i];
-          double im = ((double *)input)[2*i + 1];
-          if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
-            conv.c16.real = REAL(new_na_value)[0];
-            conv.c16.imaginary = REAL(new_na_value)[0];
-          } else {
-            conv.c16.real      = re;
-            conv.c16.imaginary = im;
-            if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
-              warn_na = true;
-          }
-          
-        } else {
-          UNPROTECT(1); // Input data for this function is protected
-          stop("Failed to convert data");
-        }
-      } else {
-        UNPROTECT(1); // Input data for this function is protected
-        stop("Failed to convert data");
-      }
+    // } else if (rtype == INTSXP) {
+    //   if (dtype.main_type == 'i' || dtype.main_type == 'u') {
+    //     
+    //     if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
+    //       conv.i8 = (int64_t)INTEGER(new_na_value)[0]; else {
+    //         conv.i8 = (int64_t)((int *)input)[i];
+    //         if (!ignore_na && ((int *)input)[i] == INTEGER(new_na_value)[0])
+    //           warn_na = true;
+    //       }
+    //       
+    //   } else {
+    //     UNPROTECT(1); // Input data for this function is protected
+    //     stop("Failed to convert data");
+    //   }
+    // } else if (rtype == REALSXP) {
+    //   if (dtype.main_type == 'i') {
+    //     
+    //     if (!ignore_na && R_IsNA(((double *)input)[i]))
+    //       conv.i8 = (int64_t)REAL(new_na_value)[0]; else {
+    //         conv.i8 = (int64_t)((double *)input)[i];
+    //         if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
+    //           warn_na = true;
+    //       }
+    //       
+    //   } else if (dtype.main_type == 'f' && dtype.byte_size == 2) {
+    //     
+    //     float16 f;
+    //     
+    //     if (!ignore_na && R_IsNA(((double *)input)[i]))
+    //       f = REAL(new_na_value)[0]; else {
+    //         f = ((double *)input)[i];
+    //         if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
+    //           warn_na = true;
+    //       }
+    //       
+    //       conv.f2 = f.GetBits();
+    //       
+    //   } else if (dtype.main_type == 'f' && dtype.byte_size == 4) {
+    //     
+    //     if (!ignore_na && R_IsNA(((double *)input)[i]))
+    //       conv.f4 = (float)REAL(new_na_value)[0]; else {
+    //         conv.f4 = (float)((double *)input)[i];
+    //         if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
+    //           warn_na = true;
+    //       }
+    //       
+    //   } else if (dtype.main_type == 'f' && dtype.byte_size == 8) {
+    //     
+    //     if (!ignore_na && R_IsNA(((double *)input)[i]))
+    //       conv.f8 = REAL(new_na_value)[0]; else {
+    //         conv.f8 = ((double *)input)[i];
+    //         if (!ignore_na && ((double *)input)[i] == REAL(new_na_value)[0])
+    //           warn_na = true;
+    //       }
+    //   } else if ((dtype.main_type == 'M' || dtype.main_type == 'm') &&
+    //     dtype.byte_size == 8) {
+    //     
+    //     if (!ignore_na && R_IsNA(((double *)input)[i])) {
+    //       conv.f8 = REAL(new_na_value)[0];
+    //     } else {
+    //       conv.f8 = ((double *)input)[i];
+    //     }
+    //     if (dtype.main_type == 'm') {
+    //       bigint = conv.f8;
+    //       memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
+    //     } else if (dtype.unit_conversion > 0) {
+    //       bigint = conv.f8/dtype.unit_conversion;
+    //       memcpy(&conv.f8, (double *)(&bigint), sizeof(double));
+    //     } else {
+    //       int64_t mon, yr;
+    //       getYM(conv.f8/86400, mon, yr);
+    //       yr = yr - 1970;
+    //       if (dtype.unit == "Y") {
+    //         memcpy(&conv.f8, (double *)(&yr), sizeof(double));
+    //       } else if (dtype.unit == "M") {
+    //         mon = yr*12 + mon - 1;
+    //         memcpy(&conv.f8, (double *)(&mon), sizeof(double));
+    // 
+    //       } else {
+    //         UNPROTECT(1); // Input data for this function is protected
+    //         stop("Unable to convert unit");
+    //       }
+    //     }
+    //     if (!ignore_na && conv.f8 == REAL(new_na_value)[0])
+    //       warn_na = true;
+    //     
+    //       
+    //   } else {
+    //     UNPROTECT(1); // Input data for this function is protected
+    //     stop("Failed to convert data");
+    //   }
+    // } else if (rtype == CPLXSXP) {
+    //   if (dtype.main_type == 'c') {
+    //     if (dtype.byte_size == 8) {
+    //       
+    //       // In R a complex number is a type consisting of two doubles (r(eal) and i(maginary))
+    //       double re = ((double *)input)[2*i];
+    //       double im = ((double *)input)[2*i + 1];
+    //       if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
+    //         conv.c8.real = (float)REAL(new_na_value)[0];
+    //         conv.c8.imaginary = (float)REAL(new_na_value)[0];
+    //       } else {
+    //         conv.c8.real      = (float)re;
+    //         conv.c8.imaginary = (float)im;
+    //         if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
+    //           warn_na = true;
+    //       }
+    //       
+    //     } else if (dtype.byte_size == 16) {
+    //       
+    //       double re = ((double *)input)[2*i];
+    //       double im = ((double *)input)[2*i + 1];
+    //       if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
+    //         conv.c16.real = REAL(new_na_value)[0];
+    //         conv.c16.imaginary = REAL(new_na_value)[0];
+    //       } else {
+    //         conv.c16.real      = re;
+    //         conv.c16.imaginary = im;
+    //         if (!ignore_na && R_IsNA(REAL(new_na_value)[0]))
+    //           warn_na = true;
+    //       }
+    //       
+    //     } else {
+    //       UNPROTECT(1); // Input data for this function is protected
+    //       stop("Failed to convert data");
+    //     }
+    //   } else {
+    //     UNPROTECT(1); // Input data for this function is protected
+    //     stop("Failed to convert data");
+    //   }
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
@@ -632,17 +632,16 @@ bool convert_data(uint8_t *input, int rtype, int n,
 
 [[cpp11::register]]
 raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
-  return(writable::raws({0,0,0,0}));
-  // blosc_dtype dt = prepare_dtype(dtype);
-  // 
-  // if (!Rf_isVector(data)) stop("Input data is not a vector!");
-  // sexp dat;
-  // 
-  // int n = LENGTH(data);
-  // uint8_t *ptr_in;
-  // if (dt.main_type == 'b' && dt.byte_size == 1) {
-  //   dat = PROTECT(Rf_coerceVector(data, LGLSXP));
-  //   ptr_in = (uint8_t *)LOGICAL(dat);
+  blosc_dtype dt = prepare_dtype(dtype);
+
+  if (!Rf_isVector(data)) stop("Input data is not a vector!");
+  sexp dat;
+
+  int n = LENGTH(data);
+  uint8_t *ptr_in;
+  if (dt.main_type == 'b' && dt.byte_size == 1) {
+    dat = PROTECT(Rf_coerceVector(data, LGLSXP));
+    ptr_in = (uint8_t *)LOGICAL(dat);
   // } else if (dt.main_type == 'i' && dt.byte_size <= 4) {
   //   dat = PROTECT(Rf_coerceVector(data, INTSXP));
   //   ptr_in = (uint8_t *)INTEGER(dat);
@@ -662,16 +661,16 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   // } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
   //   dat = PROTECT(Rf_coerceVector(data, CPLXSXP));
   //   ptr_in = (uint8_t *)COMPLEX(dat);
-  // } else {
-  //   stop("Cannot convert data type to an R type");
-  // }
-  // writable::raws result((R_xlen_t)n*dt.byte_size);
-  // uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  // bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
-  // if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  // if (warn_na) warning("Data contains values equal to the value representing missing values!");
-  // UNPROTECT(1); // unprotect dat
-  // return result;
+  } else {
+    stop("Cannot convert data type to an R type");
+  }
+  writable::raws result((R_xlen_t)n*dt.byte_size);
+  uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
+  bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
+  if (dt.needs_byteswap) byte_swap(ptr, dt, n);
+  if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  UNPROTECT(1); // unprotect dat
+  return result;
 }
 
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
