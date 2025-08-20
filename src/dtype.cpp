@@ -492,7 +492,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
         // if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
         //   warn_na = true;
         Rprintf("TODO typeof new na %i\n", TYPEOF(new_na_value));
-        if (((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
           Rprintf("Ja");
 
       } else {
