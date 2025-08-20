@@ -485,11 +485,12 @@ bool convert_data(uint8_t *input, int rtype, int n,
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
         
-        if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-          conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
-            conv.b1 = (((int *)input)[i] != 0);
-          if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
-            warn_na = true;
+        conv.b1 = (((int *)input)[i] != 0);
+        // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
+        //   conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
+        //     conv.b1 = (((int *)input)[i] != 0);
+        //   if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
+        //     warn_na = true;
           
       } else {
         stop("Failed to convert data");
@@ -667,13 +668,11 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   writable::raws result((R_xlen_t)n*dt.byte_size);
   //uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
   
-  UNPROTECT(1); // TODO
-  return writable::raws({0,0,0,0}); //TODO
-  // bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
-  // if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  // if (warn_na) warning("Data contains values equal to the value representing missing values!");
-  // UNPROTECT(1); // unprotect dat
-  // return result;
+  bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
+  if (dt.needs_byteswap) byte_swap(ptr, dt, n);
+  if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  UNPROTECT(1); // unprotect dat
+  return result;
 }
 
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
