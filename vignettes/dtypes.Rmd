@@ -14,6 +14,11 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r debugging-todo}
+library(blosc)
+dtype_to_r(as.raw(c(0x7f, 0x7e, 0x7b, 0x01)), "|u1")
+```
+
 ## What are Data Types (and Why Should You Care?)
 
 A data type is a description of how information is stored digitally and in which format.

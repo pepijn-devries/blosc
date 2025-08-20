@@ -592,7 +592,6 @@ bool convert_data(uint8_t *input, int rtype, int n,
           // In R a complex number is a type consisting of two doubles (r(eal) and i(maginary))
           double re = ((double *)input)[2*i];
           double im = ((double *)input)[2*i + 1];
-          Rcomplex c;
           if (!ignore_na && (R_IsNA(re) || R_IsNA(im))) {
             conv.c8.real = (float)REAL(new_na_value)[0];
             conv.c8.imaginary = (float)REAL(new_na_value)[0];
