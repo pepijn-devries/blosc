@@ -631,7 +631,8 @@ bool convert_data(uint8_t *input, int rtype, int n,
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
-  return warn_na;
+  //return warn_na; //TODO
+  return false;
 }
 
 [[cpp11::register]]
