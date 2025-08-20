@@ -473,8 +473,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
                   blosc_dtype dtype, uint8_t *output, sexp na_value) {
 
   sexp new_na_value = check_na(na_value, rtype);
-//  bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
-  bool warn_na = false;
+  bool warn_na = false, ignore_na = Rf_isNull(new_na_value);
   conversion_t empty, conv;
   complex64 cempty;
   cempty.real = 0.0;
@@ -490,8 +489,8 @@ bool convert_data(uint8_t *input, int rtype, int n,
         // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
         //   conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
         //     conv.b1 = (((int *)input)[i] != 0);
-        //   if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
-        //     warn_na = true;
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
+          warn_na = true;
           
       } else {
         stop("Failed to convert data");
