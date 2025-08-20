@@ -490,7 +490,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
         //   conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
         //     conv.b1 = (((int *)input)[i] != 0);
         Rprintf("TODO typeof new na %i\n", TYPEOF(new_na_value));
-        int it = INTEGER(new_na_value)[0];
+        int it = 0xff & INTEGER(new_na_value)[0];
         Rprintf("TODO typeof new na %i %i\n", TYPEOF(new_na_value), it);
 
       } else {
