@@ -666,11 +666,14 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
   }
   writable::raws result((R_xlen_t)n*dt.byte_size);
   uint8_t * ptr = (uint8_t *)(RAW(as_sexp(result)));
-  bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
-  if (dt.needs_byteswap) byte_swap(ptr, dt, n);
-  if (warn_na) warning("Data contains values equal to the value representing missing values!");
-  UNPROTECT(1); // unprotect dat
-  return result;
+  
+  UNPROTECT(1); // TODO
+  return writable::raws({0,0,0,0}); //TODO
+  // bool warn_na = convert_data(ptr_in, TYPEOF(dat), n, dt, ptr, na_value);
+  // if (dt.needs_byteswap) byte_swap(ptr, dt, n);
+  // if (warn_na) warning("Data contains values equal to the value representing missing values!");
+  // UNPROTECT(1); // unprotect dat
+  // return result;
 }
 
 void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
