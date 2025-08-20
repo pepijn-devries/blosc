@@ -369,6 +369,8 @@ sexp check_na(sexp na_value, int rtype) {
       stop("Incompatible type for `na_value`");
     }
     UNPROTECT(1);
+  } else {
+    return R_NilValue;
   }
   return result;
 }
@@ -659,7 +661,7 @@ raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
     ptr_in = (uint8_t *)REAL(dat);
   } else if(dt.main_type == 'c' && dt.byte_size <= 16) {
     dat = PROTECT(Rf_coerceVector(data, CPLXSXP));
-    ptr_in = (uint8_t *)COMPLEX(data);
+    ptr_in = (uint8_t *)COMPLEX(dat);
   } else {
     stop("Cannot convert data type to an R type");
   }
