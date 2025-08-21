@@ -1,3 +1,7 @@
+# blosc 0.0.4.0002
+
+* Some fixes to pass CRAN checks
+
 # blosc 0.0.4
 
 * Added support for date-time and delta time objects

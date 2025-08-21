@@ -2,7 +2,7 @@
 title: "Blosc Compression"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Blosc}
+  %\VignetteIndexEntry{Blosc Compression}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

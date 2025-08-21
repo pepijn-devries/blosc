@@ -4,7 +4,7 @@ test_that("Encoding works as expected", {
   expect_true({
     result <- FALSE
     for (i in 1:nrow(data_types)) {
-        result <- result || !(
+      result <- result || !(
         all(
           r_to_dtype(data_types$r_representation[[i]],
                      data_types$dtype[[i]], na = -1) ==
