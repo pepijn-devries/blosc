@@ -476,13 +476,10 @@ bool convert_data(uint8_t *input, int rtype, int n,
       if (dtype.main_type == 'b') {
         int value;
         conv.b1 = (((int *)input)[i] != 0);
-        // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-        //   conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
-        //     conv.b1 = (((int *)input)[i] != 0);
-        // if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
-        //   warn_na = true;
-        Rprintf("TODO typeof new na %i\n", TYPEOF(new_na_value));
-        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0])) 
+        if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
+          conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
+            conv.b1 = (((int *)input)[i] != 0);
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
           warn_na = true;
         UNPROTECT(1); // na_value
         
