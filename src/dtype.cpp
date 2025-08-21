@@ -99,7 +99,7 @@ void getYM(double d, int64_t &mon, int64_t &Y) {
   Y = y + 1900;
 }
 
-blosc_dtype prepare_dtype(std::string dtype) {
+blosc_dtype prepare_dtype(std::string dtype, std::string &messages) {
   blosc_dtype dt;
   int dlen = dtype.length();
   if (dlen < 3 || dlen > 9) stop("'dtype should be between 3 and 9 character long!");
@@ -164,7 +164,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
           }
         }
       } else {
-        warning("Unknown unit");
+        messages = "Unknown unit";
       }
     }
 
@@ -173,7 +173,9 @@ blosc_dtype prepare_dtype(std::string dtype) {
 
 [[cpp11::register]]
 list dtype_to_list_(std::string dtype) {
-  blosc_dtype dt = prepare_dtype(dtype);
+  std::string m = "";
+  blosc_dtype dt = prepare_dtype(dtype, m);
+  if (m != "") warning(m.c_str());
   writable::integers bs((R_xlen_t)1);
   bs[0] = (int)dt.byte_size;
   writable::logicals nb((R_xlen_t)1);
@@ -235,7 +237,9 @@ sexp check_na(sexp na_value, int rtype) {
 
 [[cpp11::register]]
 sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
-  blosc_dtype dt = prepare_dtype(dtype);
+  std::string m = "";
+  blosc_dtype dt = prepare_dtype(dtype, m);
+  if (m != "") warning(m.c_str());
   if (data.size() % dt.byte_size != 0)
     stop("Raw data size needs to be multitude of data type size");
   conversion_t conv, empty;
@@ -632,7 +636,9 @@ bool convert_data(uint8_t *input, int rtype, int n,
 
 [[cpp11::register]]
 raws r_to_dtype_(sexp data, std::string dtype, sexp na_value) {
-  blosc_dtype dt = prepare_dtype(dtype);
+  std::string m = "";
+  blosc_dtype dt = prepare_dtype(dtype, m);
+  if (m != "") warning(m.c_str());
 
   if (!Rf_isVector(data)) stop("Input data is not a vector!");
   sexp dat;
