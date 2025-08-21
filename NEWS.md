@@ -1,4 +1,4 @@
-# blosc 0.0.4.0002
+# blosc 0.0.5
 
 * Some fixes to pass CRAN checks
 

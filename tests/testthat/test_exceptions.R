@@ -57,3 +57,21 @@ test_that("difftime should always have type 'm'", {
     r_to_dtype(as.difftime(1, units = "hours"), dtype = "<f2")
   })
 })
+
+test_that("float cannot have length 1", {
+  expect_error({
+     r_to_dtype(1, dtype = "<f1")
+  })
+})
+
+test_that("Date time cannot have length other than 8", {
+  expect_error({
+    r_to_dtype(1, dtype = "<M1[s]")
+  })
+})
+
+test_that("Only date time use units", {
+  expect_warning({
+    blosc:::dtype_to_list_("<f2[s]")
+  })
+})
