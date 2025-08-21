@@ -201,6 +201,20 @@ int64_t numdays(int64_t y, int64_t m, int64_t d) {
   return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
 }
 
+sexp check_na(sexp na_value, int rtype) {
+  sexp result;
+  if (!Rf_isNull(na_value) || LENGTH(na_value) != 1) {
+    if (!Rf_isVector(na_value)) stop("Invalid NA value");
+    int rt = rtype;
+    if (rtype == LGLSXP) rt = INTSXP;
+    if (rtype == CPLXSXP) rt = REALSXP;
+    result = PROTECT(Rf_coerceVector(na_value, rt));
+  } else{
+    result = PROTECT(R_NilValue); // Also protect the NULL to avoid a protection imbalance
+  }
+  return result;
+}
+
 [[cpp11::register]]
 sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   blosc_dtype dt = prepare_dtype(dtype);
@@ -264,13 +278,16 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   }
   
   bool warn = false;
+  sexp new_na_value = check_na(na_value, TYPEOF(result));
+  
   for (int i = 0; i < mult_factor * n; i++) {
     conv = empty;
     memcpy(&conv, src + i * dt.byte_size / mult_factor, dt.byte_size / mult_factor);
     bool should_warn =
-      convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, na_value);
+      convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, new_na_value);
     if (should_warn) warn = true;
   }
+  UNPROTECT(1); //na_value
   
   if (dt.main_type == 'c') {
     // in case of 'c' convert doubles to complex vector
@@ -347,33 +364,18 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
   return result;
 }
 
-sexp check_na(sexp na_value, int rtype) {
-  sexp result;
-  if (!Rf_isNull(na_value) || LENGTH(na_value) != 1) {
-    if (!Rf_isVector(na_value)) stop("Invalid NA value");
-    int rt = rtype;
-    if (rtype == LGLSXP) rt = INTSXP;
-    if (rtype == CPLXSXP) rt = REALSXP;
-    result = PROTECT(Rf_coerceVector(na_value, rt));
-  } else{
-    result = PROTECT(R_NilValue); // Also protect the NULL to avoid a protection imbalance
-  }
-  return result;
-}
-
 bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
                       int rtype, uint8_t *output, sexp na_value) {
   bool ignore_na = Rf_isNull(na_value), warn_na = false;
-  sexp new_na_value = check_na(na_value, rtype);
   
   if (rtype == LGLSXP) {
     if (dtype.main_type == 'b' && dtype.byte_size == 1) {
       int b = (int)((int8_t)(*input).b1);
       if (!ignore_na) {
-        int nval = INTEGER(new_na_value)[0];
+        int nval = INTEGER(na_value)[0];
         if (nval != NA_INTEGER) nval = 0xff & nval;
-        if (b == NA_INTEGER && !ISNA(new_na_value)) warn_na = true;
-        if (b ==(0xff & INTEGER(new_na_value)[0])) b = NA_LOGICAL;
+        if (b == NA_INTEGER && !ISNA(na_value)) warn_na = true;
+        if (b ==(0xff & INTEGER(na_value)[0])) b = NA_LOGICAL;
       }
       memcpy(output, &b, sizeof(int));
       
@@ -399,7 +401,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     }
     
     if (!ignore_na) {
-      int nval = INTEGER(new_na_value)[0];
+      int nval = INTEGER(na_value)[0];
       if (i == NA_INTEGER && nval != NA_INTEGER) warn_na = true;
       if (i == nval) i = NA_INTEGER;
     }
@@ -431,7 +433,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     }
     
     if (!ignore_na) {
-      double nval = REAL(new_na_value)[0];
+      double nval = REAL(na_value)[0];
       if (dtype.main_type == 'M' || dtype.main_type == 'm') {
         int64_t na_cor;
         memcpy(&na_cor, (int64_t *)(&NA_REAL), sizeof(double));
@@ -457,8 +459,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     UNPROTECT(1); // na_value
     stop("Conversion method not available");
   }
-  UNPROTECT(1); // na_value
-  
+
   return warn_na;
 }
 
