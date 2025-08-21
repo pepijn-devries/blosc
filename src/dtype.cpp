@@ -202,17 +202,35 @@ int64_t numdays(int64_t y, int64_t m, int64_t d) {
 }
 
 sexp check_na(sexp na_value, int rtype) {
-  sexp result;
   if (!Rf_isNull(na_value) || LENGTH(na_value) != 1) {
-    if (!Rf_isVector(na_value)) stop("Invalid NA value");
+    if (!Rf_isVector(na_value)) return R_NilValue;
     int rt = rtype;
     if (rtype == LGLSXP) rt = INTSXP;
     if (rtype == CPLXSXP) rt = REALSXP;
-    result = PROTECT(Rf_coerceVector(na_value, rt));
+    double d = 0;
+    if (TYPEOF(na_value) == CPLXSXP) {
+      d = COMPLEX(na_value)[0].r;
+    } else if (TYPEOF(na_value) == REALSXP) {
+      d = REAL(na_value)[0];
+    } else if (TYPEOF(na_value) == INTSXP) {
+      d = (double)(INTEGER(na_value)[0]);
+    } else {
+      return R_NilValue;
+    }
+    if (rt == INTSXP) {
+      writable::integers result((R_xlen_t)1);
+      result[0] = (int)d;
+      return result;
+    }
+    else if(rt == REALSXP) {
+      writable::doubles result((R_xlen_t)1);
+      result[0] = d;
+      return result;
+    }
+    else return R_NilValue;
   } else{
-    result = PROTECT(R_NilValue); // Also protect the NULL to avoid a protection imbalance
+    return R_NilValue;
   }
-  return result;
 }
 
 [[cpp11::register]]
@@ -287,8 +305,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
       convert_data_inv(&conv, dt, TYPEOF(result), dest + i*out_size, new_na_value);
     if (should_warn) warn = true;
   }
-  UNPROTECT(1); //na_value
-  
+
   if (dt.main_type == 'c') {
     // in case of 'c' convert doubles to complex vector
     // This could be simplified once `cpp11` implements Rcomplex vectors
@@ -379,10 +396,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       }
       memcpy(output, &b, sizeof(int));
       
-    } else {
-      UNPROTECT(1); // na_value
-      stop("Conversion not implemented");
-    }
+    } else stop("Conversion not implemented");
+    
   } else if (rtype == INTSXP) {
     int i = 0;
     if (dtype.main_type == 'i' && dtype.byte_size == 1) {
@@ -395,11 +410,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       i = (int)(*input).u1;
     } else if (dtype.main_type == 'u' && dtype.byte_size == 2) {
       i = (int)(*input).u2;
-    } else {
-      UNPROTECT(1); // na_value
-      stop("Conversion not implemented");
-    }
-    
+    } else stop("Conversion not implemented");
+
     if (!ignore_na) {
       int nval = INTEGER(na_value)[0];
       if (i == NA_INTEGER && nval != NA_INTEGER) warn_na = true;
@@ -427,11 +439,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       d = (double)(*input).f4;
     } else if (dtype.main_type == 'c' && dtype.byte_size == 16) {
       d = (*input).f8;
-    } else {
-      UNPROTECT(1); // na_value
-      stop("Conversion not implemented");
-    }
-    
+    } else  stop("Conversion not implemented");
+
     if (!ignore_na) {
       double nval = REAL(na_value)[0];
       if (dtype.main_type == 'M' || dtype.main_type == 'm') {
@@ -452,13 +461,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     }
     
     memcpy(output, &d, sizeof(double));
-  } else if (rtype == CPLXSXP) {
-    UNPROTECT(1); // na_value
-    stop("This type should not occure as it is coded as REALs at this stage");
-  } else {
-    UNPROTECT(1); // na_value
-    stop("Conversion method not available");
-  }
+  } else if (rtype == CPLXSXP) stop("This type should not occure as it is coded as REALs at this stage");
+  else  stop("Conversion method not available");
 
   return warn_na;
 }
@@ -486,7 +490,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
           warn_na = true;
         
       } else {
-        UNPROTECT(2); // na_value + input data
+        UNPROTECT(1); // input data
         stop("Failed to convert data");
       }
     } else if (rtype == INTSXP) {
@@ -500,7 +504,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
           }
 
       } else {
-        UNPROTECT(2); // Input data for this function is protected + na_value
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     } else if (rtype == REALSXP) {
@@ -568,7 +572,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
             memcpy(&conv.f8, (double *)(&mon), sizeof(double));
 
           } else {
-            UNPROTECT(2); // Input data for this function is protected + na_value
+            UNPROTECT(1); // Input data for this function is protected
             stop("Unable to convert unit");
           }
         }
@@ -577,7 +581,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
 
 
       } else {
-        UNPROTECT(2); // Input data for this function is protected + na_value
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     } else if (rtype == CPLXSXP) {
@@ -612,18 +616,17 @@ bool convert_data(uint8_t *input, int rtype, int n,
           }
 
         } else {
-          UNPROTECT(2); // Input data for this function is protected + na_value
+          UNPROTECT(1); // Input data for this function is protected
           stop("Failed to convert data");
         }
       } else {
-        UNPROTECT(2); // Input data for this function is protected + na_value
+        UNPROTECT(1); // Input data for this function is protected
         stop("Failed to convert data");
       }
     }
     memcpy(output + i * dtype.byte_size, &conv, dtype.byte_size);
   }
-  UNPROTECT(1); // na_value (input data is unprotected elsewhere)
-  
+
   return warn_na;
 }
 
