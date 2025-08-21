@@ -99,11 +99,11 @@ Some examples of encoding r data to dtypes
 ```{r encoding}
 library(blosc)
 r_to_dtype(c(TRUE, FALSE), "|b1")
-# r_to_dtype(1L:4L, "|u1")
-# r_to_dtype(c(1.4, 9.8e-6), "<f8")
-# r_to_dtype(1+1i, "<c16")
-# r_to_dtype(as.POSIXct("2023-06-23 15:32:19", tz = "UTC"), "<M8[ms]")
-# r_to_dtype(as.difftime(1, units = "weeks"), "<m8[D]")
+r_to_dtype(1L:4L, "|u1")
+r_to_dtype(c(1.4, 9.8e-6), "<f8")
+r_to_dtype(1+1i, "<c16")
+r_to_dtype(as.POSIXct("2023-06-23 15:32:19", tz = "UTC"), "<M8[ms]")
+r_to_dtype(as.difftime(1, units = "weeks"), "<m8[D]")
 ```
 
 ## Precision of Types
