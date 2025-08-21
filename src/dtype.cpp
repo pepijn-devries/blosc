@@ -355,22 +355,7 @@ sexp check_na(sexp na_value, int rtype) {
     if (rtype == LGLSXP) rt = INTSXP;
     if (rtype == CPLXSXP) rt = REALSXP;
     if (LENGTH(na_value) != 1) stop("Invalid NA value");
-    sexp r = PROTECT(Rf_coerceVector(na_value, rt));
-    if (rt == INTSXP) {
-      writable::integers temp((R_xlen_t)1);
-      temp[0] = INTEGER(r)[0];
-      result = temp;
-    } else if (rt == REALSXP) {
-      writable::doubles temp((R_xlen_t)1);
-      temp[0] = REAL(r)[0];
-      result = temp;
-    } else {
-      UNPROTECT(1);
-      stop("Incompatible type for `na_value`");
-    }
-    UNPROTECT(1);
-  } else {
-    return R_NilValue;
+    sexp result = PROTECT(Rf_coerceVector(na_value, rt));
   }
   return result;
 }
@@ -392,6 +377,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       memcpy(output, &b, sizeof(int));
       
     } else {
+      UNPROTECT(1); // na_value
       stop("Conversion not implemented");
     }
   } else if (rtype == INTSXP) {
@@ -407,6 +393,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     } else if (dtype.main_type == 'u' && dtype.byte_size == 2) {
       i = (int)(*input).u2;
     } else {
+      UNPROTECT(1); // na_value
       stop("Conversion not implemented");
     }
     
@@ -438,6 +425,7 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     } else if (dtype.main_type == 'c' && dtype.byte_size == 16) {
       d = (*input).f8;
     } else {
+      UNPROTECT(1); // na_value
       stop("Conversion not implemented");
     }
     
@@ -462,8 +450,10 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     
     memcpy(output, &d, sizeof(double));
   } else if (rtype == CPLXSXP) {
+    UNPROTECT(1); // na_value
     stop("This type should not occure as it is coded as REALs at this stage");
   } else {
+    UNPROTECT(1); // na_value
     stop("Conversion method not available");
   }
   return warn_na;
@@ -492,10 +482,12 @@ bool convert_data(uint8_t *input, int rtype, int n,
         // if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
         //   warn_na = true;
         Rprintf("TODO typeof new na %i\n", TYPEOF(new_na_value));
-        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0])) 
           warn_na = true;
-
+        UNPROTECT(1); // na_value
+        
       } else {
+        UNPROTECT(2); // na_value + input data
         stop("Failed to convert data");
       }
     // } else if (rtype == INTSXP) {
