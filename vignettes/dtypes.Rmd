@@ -117,7 +117,7 @@ This will become apparent when you convert your dtype back to an `R` type.
 
 Some examples where you will lose precision:
 
-```{r precision, eval=FALSE}
+```{r precision}
 ## Encoding numeric (64 bit) as a 16 bit float:
 r_to_dtype(0.123, "<f2") |>
   dtype_to_r("<f2")
@@ -141,7 +141,7 @@ insufficient storage capacity to store `R` `NA` values
 The examples below show how you can use custom values to prepresent missing
 values.
 
-```{r missing, eval=FALSE}
+```{r missing}
 ## As `na_value` is not specified for `dtype_to_r()`
 ## and the NA value is masked to 8 bit, the `FALSE`
 ## value is mistakenly interpreted as `NA`

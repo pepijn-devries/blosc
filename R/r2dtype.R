@@ -55,20 +55,19 @@
 #' @rdname dtype
 #' @author Pepijn de Vries
 #' @examples
-#' #TODO enable examples
 #' ## Encode volcano data to 16 bit floating point values
-#' #volcano_encoded <-
-#'#   r_to_dtype(volcano, dtype = "<f2")
+#' volcano_encoded <-
+#'   r_to_dtype(volcano, dtype = "<f2")
 #'
 #' ## Decode the volcano format to its original
-#' #volcano_reconstructed <-
-#'#   dtype_to_r(volcano_encoded, dtype = "<f2")
+#' volcano_reconstructed <-
+#'   dtype_to_r(volcano_encoded, dtype = "<f2")
 #' 
 #' ## The reconstruction is the same as its original:
-#' #all(volcano_reconstructed == volcano)
+#' all(volcano_reconstructed == volcano)
 #' 
 #' ## Encode a numeric sequence with a missing value represented by -999
-#' #r_to_dtype(c(1, 2, 3, NA, 4), dtype = "<i2", na_value = -999)
+#' r_to_dtype(c(1, 2, 3, NA, 4), dtype = "<i2", na_value = -999)
 #' @export
 r_to_dtype <- function(x, dtype, na_value = NA, ...) {
   if (inherits(x, "POSIXlt")) x <- as.POSIXct(x)

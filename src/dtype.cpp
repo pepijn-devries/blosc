@@ -278,7 +278,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     sexp c = PROTECT(Rf_allocVector(CPLXSXP, n));
     uint8_t * cptr = (uint8_t *)COMPLEX(c);
     memcpy(cptr, dest, n * sizeof(Rcomplex));
-    UNPROTECT(1);
+    UNPROTECT(1); // c
     return c;
   }
   if (dt.main_type == 'M') {
@@ -349,13 +349,14 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
 
 sexp check_na(sexp na_value, int rtype) {
   sexp result;
-  if (!Rf_isNull(na_value)) {
+  if (!Rf_isNull(na_value) || LENGTH(na_value) != 1) {
     if (!Rf_isVector(na_value)) stop("Invalid NA value");
     int rt = rtype;
     if (rtype == LGLSXP) rt = INTSXP;
     if (rtype == CPLXSXP) rt = REALSXP;
-    if (LENGTH(na_value) != 1) stop("Invalid NA value");
-    sexp result = PROTECT(Rf_coerceVector(na_value, rt));
+    result = PROTECT(Rf_coerceVector(na_value, rt));
+  } else{
+    result = PROTECT(R_NilValue); // Also protect the NULL to avoid a protection imbalance
   }
   return result;
 }
@@ -456,6 +457,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
     UNPROTECT(1); // na_value
     stop("Conversion method not available");
   }
+  UNPROTECT(1); // na_value
+  
   return warn_na;
 }
 
@@ -474,12 +477,11 @@ bool convert_data(uint8_t *input, int rtype, int n,
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
-        int value;
         conv.b1 = (((int *)input)[i] != 0);
         if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
           conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
             conv.b1 = (((int *)input)[i] != 0);
-        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
+        if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
           warn_na = true;
         
       } else {
