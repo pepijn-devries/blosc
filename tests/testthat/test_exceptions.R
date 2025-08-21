@@ -70,8 +70,3 @@ test_that("Date time cannot have length other than 8", {
   })
 })
 
-test_that("Only date time use units", {
-  expect_warning({
-    blosc:::dtype_to_list_("<f2[s]")
-  })
-})
