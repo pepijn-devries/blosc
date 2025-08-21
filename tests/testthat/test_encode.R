@@ -45,3 +45,12 @@ test_that("difftime is accepted", {
           as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)))
   })
 })
+
+test_that("difftime is converted when unit is not known by R", {
+  expect_true({
+    abs(1 - as.numeric(
+      dtype_to_r(
+        as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)), "<m8[ns]")) /
+        1e+9) < 1e-6
+  })
+})

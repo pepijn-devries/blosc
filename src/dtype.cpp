@@ -163,8 +163,6 @@ blosc_dtype prepare_dtype(std::string dtype) {
             break;
           }
         }
-      } else {
-        warning("Unknown unit");
       }
     }
 
