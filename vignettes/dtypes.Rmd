@@ -143,10 +143,10 @@ values.
 
 ```{r missing}
 ## As `na_value` is not specified for `dtype_to_r()`
-## and the NA value is masked to 8 bit, the `FALSE`
-## value is mistakenly interpreted as `NA`
-r_to_dtype(c(TRUE, NA, FALSE, TRUE), "|b1", na_value = -1) |>
-  dtype_to_r("|b1")
+## and the NA value is masked to 8 bit, the `NA`
+## value is mistakenly interpreted as `TRUE`
+r_to_dtype(c(TRUE, NA, FALSE, TRUE), "|b1") |>
+  dtype_to_r("|b1", na_value = NA_integer_)
 
 ## This can be fixed by specifying `na_value`
 r_to_dtype(c(TRUE, NA, FALSE, TRUE), "|b1", na_value = -1) |>

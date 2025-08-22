@@ -5,6 +5,13 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
+// blosc-feats.cpp
+list blosc_info_(raws data);
+extern "C" SEXP _blosc_blosc_info_(SEXP data) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(blosc_info_(cpp11::as_cpp<cpp11::decay_t<raws>>(data)));
+  END_CPP11
+}
 // compress.cpp
 raws blosc_compress_dat(raws data, std::string compressor, int level, int doshuffle, int typesize);
 extern "C" SEXP _blosc_blosc_compress_dat(SEXP data, SEXP compressor, SEXP level, SEXP doshuffle, SEXP typesize) {
@@ -45,6 +52,7 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_blosc_blosc_compress_dat",   (DL_FUNC) &_blosc_blosc_compress_dat,   5},
     {"_blosc_blosc_decompress_dat", (DL_FUNC) &_blosc_blosc_decompress_dat, 1},
+    {"_blosc_blosc_info_",          (DL_FUNC) &_blosc_blosc_info_,          1},
     {"_blosc_dtype_to_list_",       (DL_FUNC) &_blosc_dtype_to_list_,       1},
     {"_blosc_dtype_to_r_",          (DL_FUNC) &_blosc_dtype_to_r_,          3},
     {"_blosc_r_to_dtype_",          (DL_FUNC) &_blosc_r_to_dtype_,          3},

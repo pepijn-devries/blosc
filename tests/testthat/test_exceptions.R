@@ -70,3 +70,8 @@ test_that("Date time cannot have length other than 8", {
   })
 })
 
+test_that("blosc_info won't accept invalid data", {
+  expect_error({
+    blosc_info(raw(5))
+  })
+})

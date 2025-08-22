@@ -2,6 +2,7 @@
 
 export(blosc_compress)
 export(blosc_decompress)
+export(blosc_info)
 export(dtype_to_r)
 export(r_to_dtype)
 useDynLib(blosc, .registration = TRUE)

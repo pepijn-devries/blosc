@@ -388,9 +388,8 @@ bool convert_data_inv(conversion_t *input, blosc_dtype dtype,
       int b = (int)((int8_t)(*input).b1);
       if (!ignore_na) {
         int nval = INTEGER(na_value)[0];
-        if (nval != NA_INTEGER) nval = 0xff & nval;
         if (b == NA_INTEGER && !ISNA(na_value)) warn_na = true;
-        if (b ==(0xff & INTEGER(na_value)[0])) b = NA_LOGICAL;
+        if (b == nval) b = NA_LOGICAL;
       }
       memcpy(output, &b, sizeof(int));
       
@@ -477,11 +476,17 @@ bool convert_data(uint8_t *input, int rtype, int n,
   empty.c16 = cempty; // <== an empty conversion type (all bits set to zero)
   int64_t bigint = 0;
   for (int i = 0; i < n; i++) {
+    // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
+    //   conv.i1 = 0xff & INTEGER(na_value)[0]; else
+    //     conv.b1 = (bool)((int *)input)[i];
+    //   if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
+    //     warn_na = true;
+      
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
         conv.b1 = (((int *)input)[i] != 0);
-        if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
+        if (!ignore_na && ((int *)input)[i] == NA_INTEGER)
           conv.i1 = (int8_t)(0xff & INTEGER(new_na_value)[0]); else
             conv.b1 = (((int *)input)[i] != 0);
         if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(new_na_value)[0]))
