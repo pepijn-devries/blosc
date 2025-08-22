@@ -70,3 +70,21 @@ blosc_decompress <- function(x, ...) {
     result <- do.call(dtype_to_r, args)
   return(result)
 }
+
+#' Information about compressed data
+#' 
+#' Obtain information about raw data compressed with blosc.
+#' @param x Raw data compressed with `blosc_compress()`.
+#' @param ... Ignored
+#' @returns Returns a named list with information about blosc compressed
+#' data `x`.
+#' @examples
+#' data_compressed <-
+#'   blosc_compress(volcano, typesize = 2, dtype = "<i2", compressor = "lz4",
+#'                  shuffle = "bitshuffle")
+#' 
+#' blosc_info(data_compressed)
+#'@export
+blosc_info <- function(x, ...) {
+  blosc_info_(x)
+}
