@@ -83,7 +83,12 @@ has been compressed with Blosc. It doesn't have to be created in `R`, it can
 be generated with any software using the [c-blosc library](https://github.com/Blosc/c-blosc).
 
 You don't have to specify the compression algorithm, typesize or anything else.
-All that information is embedded in the header of the raw input data.
+All that information is embedded in the header of the raw input data. You can even
+retrieve this information with:
+
+```{r blosc-info}
+blosc_info( compressed_iris )
+```
 
 ### Output
 
@@ -96,7 +101,7 @@ iris_length1 <- blosc_decompress(compressed_iris)
 head(iris_length1)
 ```
 It works, but we got `raw()` data as output. This is because the decompressor
-knows nothing about the data structure of the decompressed data. Since we know
+knows little about the data structure of the decompressed data. Since we know
 that we have encoded it as little-endian 16 bit floating point values (`"<f2"`),
 we can specify it as such. Once specified, the function will automatically decode
 the data.
