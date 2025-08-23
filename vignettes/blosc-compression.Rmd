@@ -54,7 +54,7 @@ little-endian 16 bit floating point data (`"<f2"`) and compresses it.
 
 ## Explicitely set the `typesize` to 2
 compressed_iris <-
-  blosc_compress(iris$Petal.Length, compressor = "zlib", typesize = 2, dtype = "<f2")
+  blosc_compress(iris$Petal.Length, typesize = 2, dtype = "<f2")
 ```
 
 ### Output
