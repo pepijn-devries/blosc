@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,7 +147,41 @@ doesn’t have to be created in <code>R</code>, it can be generated with
 any software using the <a href="https://github.com/Blosc/c-blosc" class="external-link">c-blosc library</a>.</p>
 <p>You don’t have to specify the compression algorithm, typesize or
 anything else. All that information is embedded in the header of the raw
-input data.</p>
+input data. You can even retrieve this information with:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/blosc_info.html">blosc_info</a></span><span class="op">(</span> <span class="va">compressed_iris</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; $Compressor</span></span>
+<span><span class="co">#&gt; [1] "BloscLZ"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Blosc format version`</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Internal compressor version`</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Type size in bytes`</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Block size in bytes`</span></span>
+<span><span class="co">#&gt; [1] 300</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Uncompressed size in bytes`</span></span>
+<span><span class="co">#&gt; [1] 300</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Compressed size in bytes`</span></span>
+<span><span class="co">#&gt; [1] 316</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Shuffle</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Pure memcpy`</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`Bit shuffle`</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attr(,"class")</span></span>
+<span><span class="co">#&gt; [1] "blosc_info" "list"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="output-1">Output<a class="anchor" aria-label="anchor" href="#output-1"></a>
@@ -156,17 +190,17 @@ input data.</p>
 returns <code><a href="https://rdrr.io/r/base/raw.html" class="external-link">raw()</a></code> data. Do you remember the iris length data
 that we compressed earlier? We can simply decompress it by calling
 <code><a href="../reference/blosc.html">blosc_decompress()</a></code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iris_length1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blosc.html">blosc_decompress</a></span><span class="op">(</span><span class="va">compressed_iris</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iris_length1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 99 3d 99 3d 33 3d</span></span></code></pre></div>
 <p>It works, but we got <code><a href="https://rdrr.io/r/base/raw.html" class="external-link">raw()</a></code> data as output. This is
-because the decompressor knows nothing about the data structure of the
+because the decompressor knows little about the data structure of the
 decompressed data. Since we know that we have encoded it as
 little-endian 16 bit floating point values (<code>"&lt;f2"</code>), we
 can specify it as such. Once specified, the function will automatically
 decode the data.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iris_length2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blosc.html">blosc_decompress</a></span><span class="op">(</span><span class="va">compressed_iris</span>, dtype <span class="op">=</span> <span class="st">"&lt;f2"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">iris_length2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="blosc-compression_files/figure-html/decompress-type-1.png" width="50%"></p>
