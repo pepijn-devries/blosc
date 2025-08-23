@@ -1,6 +1,6 @@
 Package: blosc
 Title: Compress and Decompress Data Using the BLOSC Library
-Version: 0.0.5.0003
+Version: 0.0.5.0004
 Authors@R: 
     person("Pepijn", "de Vries", role = c("aut", "cre"),
       email = "pepijn.devries@outlook.com",
