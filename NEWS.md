@@ -1,4 +1,4 @@
-# blosc 0.0.5.0002
+# blosc 0.0.5.0003
 
 * Added `blosc_info()`
 * Corrected NA handling for logicals
