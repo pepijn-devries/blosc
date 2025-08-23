@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,7 @@ compresses it.</p>
 <span></span>
 <span><span class="co">## Explicitely set the `typesize` to 2</span></span>
 <span><span class="va">compressed_iris</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="../reference/blosc.html">blosc_compress</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Petal.Length</span>, compressor <span class="op">=</span> <span class="st">"zlib"</span>, typesize <span class="op">=</span> <span class="fl">2</span>, dtype <span class="op">=</span> <span class="st">"&lt;f2"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/blosc.html">blosc_compress</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Petal.Length</span>, typesize <span class="op">=</span> <span class="fl">2</span>, dtype <span class="op">=</span> <span class="st">"&lt;f2"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
@@ -151,7 +151,7 @@ input data. You can even retrieve this information with:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/blosc_info.html">blosc_info</a></span><span class="op">(</span> <span class="va">compressed_iris</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; $Compressor</span></span>
-<span><span class="co">#&gt; [1] "Zlib"</span></span>
+<span><span class="co">#&gt; [1] "BloscLZ"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $`Blosc format version`</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
@@ -169,13 +169,13 @@ input data. You can even retrieve this information with:</p>
 <span><span class="co">#&gt; [1] 300</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $`Compressed size in bytes`</span></span>
-<span><span class="co">#&gt; [1] 233</span></span>
+<span><span class="co">#&gt; [1] 316</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Shuffle</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $`Pure memcpy`</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $`Bit shuffle`</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
