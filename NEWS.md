@@ -1,7 +1,8 @@
-# blosc 0.0.5.0004
+# blosc 0.0.6
 
 * Added `blosc_info()`
 * Corrected NA handling for logicals
+* Some edits to pass CRAN checks
 
 # blosc 0.0.5
 

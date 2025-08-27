@@ -4,11 +4,11 @@
 \name{blosc-package}
 \alias{blosc}
 \alias{blosc-package}
-\title{blosc: Compress and Decompress Data Using the BLOSC Library}
+\title{blosc: Compress and Decompress Data Using the 'BLOSC' Library}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Arrays of structured data types can require large volumes of disk space to store. Blosc is a library that provides a fast and efficient way to compress such data. It is often applied in storage of n-dimensional arrays, such as in the case of the geo-spatial zarr file format. This package can be used to compress and decompress data using Blosc.
+Arrays of structured data types can require large volumes of disk space to store. 'Blosc' is a library that provides a fast and efficient way to compress such data. It is often applied in storage of n-dimensional arrays, such as in the case of the geo-spatial 'zarr' file format. This package can be used to compress and decompress data using 'Blosc'.
 }
 \seealso{
 Useful links:
@@ -21,6 +21,12 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Pepijn de Vries \email{pepijn.devries@outlook.com} (\href{https://orcid.org/0000-0002-7961-6646}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Chris Maiwald [copyright holder]
+  \item Alexander Gessler [copyright holder]
+}
 
 }
 \keyword{internal}
