@@ -476,12 +476,7 @@ bool convert_data(uint8_t *input, int rtype, int n,
   empty.c16 = cempty; // <== an empty conversion type (all bits set to zero)
   int64_t bigint = 0;
   for (int i = 0; i < n; i++) {
-    // if (!ignore_na && ((int *)input)[i] == NA_LOGICAL)
-    //   conv.i1 = 0xff & INTEGER(na_value)[0]; else
-    //     conv.b1 = (bool)((int *)input)[i];
-    //   if (!ignore_na && ((int *)input)[i] == (0xff & INTEGER(na_value)[0]))
-    //     warn_na = true;
-      
+
     conv = empty;
     if (rtype == LGLSXP) {
       if (dtype.main_type == 'b') {
