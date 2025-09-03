@@ -68,6 +68,12 @@ image(volcano_reconstructed, col = terrain.colors(24L))
 
 <img src="man/figures/README-example2-1.png" width="50%" />
 
+## More details
+
+For more details about Blosc compression and decompression please check
+`vignette("blosc-compression")`. For more information about data type
+encoding and decoding please check `vignette("dtypes")`.
+
 ## Acknowledgements
 
 Big thanks to Simon Urbanek for assisting with setting up the MacOS

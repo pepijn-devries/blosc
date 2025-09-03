@@ -1,2 +1,2 @@
 PKG_LIBS=@libs@
-PKG_CPPFLAGS=@cflags@
+PKG_CPPFLAGS=@cppflags@

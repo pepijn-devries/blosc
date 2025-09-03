@@ -20,11 +20,13 @@ a code consisting of at least 3 characters. The first character indicates the
 The second character represents the main data type (\code{'b'} boolean (logical),
 \code{'i'} signed integer, \code{'u'} unsigned integer, \code{'f'} floating point number,
 \code{'c'} complex number). \code{'M'} is used for date-time objects and \code{'m'} for delta
-time (see \code{\link[=difftime]{difftime()}}).
+time (see \code{\link[=difftime]{difftime()}}). \code{'S'} for UTF8 encoded character strings and \code{'U'} for
+UTF32 encoded character strings.
 
 The following characters are numerical indicating the byte size of the data type.
 For example: \code{dtype = "<f4"} means a 32 bit floating point number; \code{dtype = "|b1"}
-means an 8 bit logical value.
+means an 8 bit logical value. An exception is the main type \code{'U'}, where the number
+indicates the number of characters, where each character is represented by 4 bytes.
 
 The main types \code{'M'} and \code{'m'} should always be ended with the time unit between
 square brackets for storing the date time (difference). A valid code would be \verb{"<M8[h]}.
