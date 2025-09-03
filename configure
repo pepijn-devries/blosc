@@ -64,7 +64,7 @@ if [ $? -ne 0 ]; then
   echo " * brew: $PKG_MACOS_NAME (OSX)"
   echo " * csw: $PKG_CSW_NAME (Solaris)"
   echo "On MacOS you can call from R:"
-  echo "`source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")`"
+  echo "'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'"
   echo "-------------------------- [ERROR MESSAGE] ---------------------------"
   cat configure.log
   echo "--------------------------------------------------------------------"
