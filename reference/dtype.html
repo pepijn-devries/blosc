@@ -9,7 +9,7 @@ convert between R native types and raw data."><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.0001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,10 +67,12 @@ a code consisting of at least 3 characters. The first character indicates the
 <p>The second character represents the main data type (<code>'b'</code> boolean (logical),
 <code>'i'</code> signed integer, <code>'u'</code> unsigned integer, <code>'f'</code> floating point number,
 <code>'c'</code> complex number). <code>'M'</code> is used for date-time objects and <code>'m'</code> for delta
-time (see <code><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime()</a></code>).</p>
+time (see <code><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime()</a></code>). <code>'S'</code> for UTF8 encoded character strings and <code>'U'</code> for
+UTF32 encoded character strings.</p>
 <p>The following characters are numerical indicating the byte size of the data type.
 For example: <code>dtype = "&lt;f4"</code> means a 32 bit floating point number; <code>dtype = "|b1"</code>
-means an 8 bit logical value.</p>
+means an 8 bit logical value. An exception is the main type <code>'U'</code>, where the number
+indicates the number of characters, where each character is represented by 4 bytes.</p>
 <p>The main types <code>'M'</code> and <code>'m'</code> should always be ended with the time unit between
 square brackets for storing the date time (difference). A valid code would be <code>"&lt;M8[h]</code>.</p>
 <p>For more details about dtypes see

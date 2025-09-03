@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.0001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -208,6 +208,19 @@ with caution</td>
 integer, whereas <code>difftime</code> stores the object as a
 <code>double</code>. Use with caution</td>
 </tr>
+<tr class="odd">
+<td><code>|S*</code></td>
+<td colspan="2">UTF8 string</td>
+<td><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>|U*</code></td>
+<td colspan="2">UTF32 string</td>
+<td><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code></td>
+<td>Note that UTF8 encoding is used in the conversion process. Hence,
+information may get lost. Use with caution</td>
+</tr>
 </tbody>
 </table>
 <p>Some examples of encoding r data to dtypes</p>
@@ -224,7 +237,9 @@ integer, whereas <code>difftime</code> stores the object as a
 <span><span class="fu"><a href="../reference/dtype.html">r_to_dtype</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="st">"2023-06-23 15:32:19"</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span>, <span class="st">"&lt;M8[ms]"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] b8 83 e2 e8 88 01 00 00</span></span>
 <span><span class="fu"><a href="../reference/dtype.html">r_to_dtype</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">as.difftime</a></span><span class="op">(</span><span class="fl">1</span>, units <span class="op">=</span> <span class="st">"weeks"</span><span class="op">)</span>, <span class="st">"&lt;m8[D]"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 07 00 00 00 00 00 00 00</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 07 00 00 00 00 00 00 00</span></span>
+<span><span class="fu"><a href="../reference/dtype.html">r_to_dtype</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foo"</span>, <span class="st">"bar"</span>, <span class="st">"foobar"</span><span class="op">)</span>, <span class="st">"|S6"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] 66 6f 6f 00 00 00 62 61 72 00 00 00 66 6f 6f 62 61 72</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="precision-of-types">Precision of Types<a class="anchor" aria-label="anchor" href="#precision-of-types"></a>
