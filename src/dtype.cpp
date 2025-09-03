@@ -1,5 +1,4 @@
 #include <cpp11.hpp>
-#include <codecvt>
 #include <regex>
 #include "umHalf.h"
 
@@ -10,6 +9,8 @@ using namespace cpp11;
 #define days_in_year(year) (isleap(year) ? 366 : 365)
 #define days_in_month(mon, yr) ((mon == 1 && isleap(1900+yr)) ? 29 : month_days[mon])
 #define MAX_DTYPE_SIZE 255
+#define DT_UNITS_SIZE 12
+#define DIFFTIME_SIZE 5
 
 static const int month_days[12] =
   {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -159,7 +160,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
     dt.unit_conversion = -1;
     if (dt.unit.length() > 0) {
       if (dt.main_type == 'M' || dt.main_type == 'm') {
-        for (int j = 0; j < (int)std::size(dt_units); j++) {
+        for (int j = 0; j < DT_UNITS_SIZE; j++) {
           if (dt.unit == dt_units[j]) {
             dt.unit_conversion = to_seconds[j];
             break;
@@ -243,7 +244,6 @@ sexp check_na(sexp na_value, int rtype) {
 
 [[cpp11::register]]
 sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
-  
   blosc_dtype dt = prepare_dtype(dtype);
   if (data.size() % dt.byte_size != 0)
     stop("Raw data size needs to be multitude of data type size");
@@ -320,14 +320,20 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
       na_str = std::string(CHAR(STRING_PTR_RO(new_na_value)[0]));
     }
     if (n % 4 != 0) stop("Unicode characters should consist of 4 bytes!");
+    auto intToUtf8 = package("base")["intToUtf8"];
     writable::strings res_str((R_xlen_t) n/4);
-    char buffer[4*MAX_DTYPE_SIZE + 4];
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+    
+    writable::integers val((R_xlen_t)1);
+    char buffer[MAX_DTYPE_SIZE + 1];
     for (int i = 0; i < n/4; i ++) {
-      memset(buffer, 0x00, 4*MAX_DTYPE_SIZE + 4);
-      memcpy(buffer, src + i * dt.byte_size * 4, dt.byte_size * 4);
-      std::u32string s((char32_t *)buffer);
-      res_str[i] = std::string(convert.to_bytes(s));
+      memset(buffer, 0x00, MAX_DTYPE_SIZE + 1);
+      for (int j = 0; j < dt.byte_size; j++) {
+        val[0] = ((int *)src)[i*dt.byte_size + j];
+        sexp code = intToUtf8(val);
+        if (Rf_isNull(code) || LENGTH(code) != 1) stop("Failed to convert Unicode");
+        memcpy(buffer + j, CHAR(STRING_PTR_RO(code)[0]), 1);
+      }
+      res_str[i] = std::string(buffer);
       if (res_str[i] == na_str) res_str[i] = NA_STRING;
     }
     
@@ -391,7 +397,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     writable::strings unts((R_xlen_t)1);
     int target_unit = -1;
     double unt_conv = 1;
-    for (int j = 0; j < (int)std::size(difftime_units_cor); j ++) {
+    for (int j = 0; j < DIFFTIME_SIZE; j ++) {
       if (difftime_units_cor[j] == dt.unit) {
         target_unit = j;
         break;
@@ -400,9 +406,9 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     int start = -1, end = -1;
     if (target_unit < 0) {
       
-      for (int j = (int)std::size(dt_units) - 1; j >= 0; j--) {
+      for (int j = DT_UNITS_SIZE - 1; j >= 0; j--) {
         if (dt.unit == dt_units[j]) start = j;
-        for (int k = 0; k < (int)std::size(difftime_units_cor); k++) {
+        for (int k = 0; k < DIFFTIME_SIZE; k++) {
           if (difftime_units_cor[k] == dt_units[j]) {
             target_unit = k;
             end = j;
@@ -526,7 +532,7 @@ bool convert_data(uint8_t *input, SEXP input_data, int rtype, int n,
   cempty.imaginary = 0.0;
   empty.c16 = cempty; // <== an empty conversion type (all bits set to zero)
   int64_t bigint = 0;
-  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+  //std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
   
   for (int i = 0; i < n; i++) {
     
@@ -689,9 +695,13 @@ bool convert_data(uint8_t *input, SEXP input_data, int rtype, int n,
         memcpy(output + i*dtype.byte_size, s.c_str(), len);
         continue;
       } else if (dtype.main_type == 'U') {
-        std::u32string utf32_content = convert.from_bytes(s.c_str());
+        // Note that errors in utf8ToInt are not caught
+        // and may cause a protection imbalance
+        auto utf8ToInt = package("base")["utf8ToInt"];
+        r_string sr = s;
+        sexp code = utf8ToInt(sr);
         memset(output + i*dtype.byte_size*4, 0x00, dtype.byte_size*4);
-        memcpy(output + i*dtype.byte_size*4, utf32_content.data(), len*4);
+        memcpy(output + i*dtype.byte_size*4, INTEGER(code), LENGTH(code)*sizeof(int));
         continue;
         
       } else {
