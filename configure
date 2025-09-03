@@ -2,6 +2,10 @@
 
 # A dressed down version of:
 # Anticonf (tm) script by Jeroen Ooms (2024)
+PKG_DEB_NAME="libblosc-dev"
+PKG_RPM_NAME="blosc-devel"
+PKG_CSW_NAME="blosc-dev"
+PKG_MACOS_NAME="c-blosc"
 
 PKG_TEST_HEADER="<blosc.h>"
 
@@ -16,11 +20,11 @@ fi
 
 if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
   echo "Found INCLUDE_DIR and/or LIB_DIR!"
-  PKG_CFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
+  PKG_CXXFLAGS="-I$INCLUDE_DIR $PKG_CFLAGS"
   PKG_LIBS="-L$LIB_DIR $PKG_LIBS"
 elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   echo "Found pkg-config cflags and libs!"
-  PKG_CFLAGS=${PKGCONFIG_CFLAGS}
+  PKG_CXXFLAGS=${PKGCONFIG_CFLAGS}
   PKG_LIBS=${PKGCONFIG_LIBS}
 else
   echo "Did not find pkg-config cflags and libs, trying to guess them!"
@@ -31,7 +35,7 @@ else
     fi
   done
   if test -n "${cpre}"; then
-    PKG_CFLAGS="-I${cpre}/include"
+    PKG_CXXFLAGS="-I${cpre}/include"
     if test "${cpre}" = /usr; then
       PKG_LIBS="-lblosc -llz4 -lzstd -lz"
     else
@@ -41,21 +45,26 @@ else
 fi
 
 # For debugging
-echo "Using PKG_CFLAGS=$PKG_CFLAGS"
+echo "Using PKG_CXXFLAGS=$PKG_CXXFLAGS"
 echo "Using PKG_LIBS=$PKG_LIBS"
 
 # Find compiler
 CXX=`${R_HOME}/bin/R CMD config CXX`
-CFLAGS=`${R_HOME}/bin/R CMD config CFLAGS`
 CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
 
 # Test configuration
-echo "#include $PKG_TEST_HEADER" | ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E -xc++ - >/dev/null 2>configure.log
+echo "#include $PKG_TEST_HEADER" | ${CXX} ${CPPFLAGS} ${PKG_CXXFLAGS} -E -xc++ - >/dev/null 2>configure.log
 
 # Customize the error
 if [ $? -ne 0 ]; then
   echo "--------------------------- [ANTICONF] --------------------------------"
-  echo "Could not find the required static library BLOSC"
+  echo "Configuration failed to find the BLOSC engine library. Try installing:"
+  echo " * deb: $PKG_DEB_NAME (Debian / Ubuntu)"
+  echo " * rpm: $PKG_RPM_NAME (Fedora, EPEL)"
+  echo " * brew: $PKG_MACOS_NAME (OSX)"
+  echo " * csw: $PKG_CSW_NAME (Solaris)"
+  echo "On MacOS you can call from R:"
+  echo "`source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")`"
   echo "-------------------------- [ERROR MESSAGE] ---------------------------"
   cat configure.log
   echo "--------------------------------------------------------------------"
@@ -63,7 +72,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Write to Makevars
-sed -e "s|@cflags@|$PKG_CFLAGS|" -e "s|@libs@|$PKG_LIBS|" src/Makevars.in > src/Makevars
+sed -e "s|@cppflags@|$PKG_CPPFLAGS|" -e "s|@libs@|$PKG_LIBS|" src/Makevars.in > src/Makevars
 
 # Success
 exit 0

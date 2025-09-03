@@ -26,11 +26,13 @@
 #' The second character represents the main data type (`'b'` boolean (logical),
 #' `'i'` signed integer, `'u'` unsigned integer, `'f'` floating point number,
 #' `'c'` complex number). `'M'` is used for date-time objects and `'m'` for delta
-#' time (see [difftime()]).
+#' time (see [difftime()]). `'S'` for UTF8 encoded character strings and `'U'` for
+#' UTF32 encoded character strings.
 #' 
 #' The following characters are numerical indicating the byte size of the data type.
 #' For example: `dtype = "<f4"` means a 32 bit floating point number; `dtype = "|b1"`
-#' means an 8 bit logical value.
+#' means an 8 bit logical value. An exception is the main type `'U'`, where the number
+#' indicates the number of characters, where each character is represented by 4 bytes.
 #' 
 #' The main types `'M'` and `'m'` should always be ended with the time unit between
 #' square brackets for storing the date time (difference). A valid code would be `"<M8[h]`.
