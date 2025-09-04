@@ -166,7 +166,7 @@ r_to_dtype(c(1, NA, 4, 5), "<i4", na_value = -999) |>
   dtype_to_r("<i4")
 
 ## If the `na_value` is specified for `dtype_to_r()`,
-## it will interpreted as NA
+## it will be interpreted as NA
 r_to_dtype(c(1, NA, 4, 5), "<i4", na_value = -999) |>
   dtype_to_r("<i4", na_value = -999)
 ```
