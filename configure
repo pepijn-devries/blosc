@@ -53,7 +53,11 @@ CXX=`${R_HOME}/bin/R CMD config CXX`
 CPPFLAGS=`${R_HOME}/bin/R CMD config CPPFLAGS`
 
 # Test configuration
-echo "#include $PKG_TEST_HEADER" | ${CXX} ${CPPFLAGS} ${PKG_CXXFLAGS} -xc++ - >/dev/null 2>configure.log
+echo "#include $PKG_TEST_HEADER
+int main() {
+  if (BLOSC_VERSION_MAJOR < 1) return -1;
+  return 0;
+}" | ${CXX} ${CPPFLAGS} ${PKG_CXXFLAGS} -xc++ - >/dev/null 2>configure.log
 
 # Customize the error
 if [ $? -ne 0 ]; then

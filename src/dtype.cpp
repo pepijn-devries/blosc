@@ -1,6 +1,7 @@
 #include <cpp11.hpp>
 #include <regex>
 #include "umHalf.h"
+#include "blosc.h"
 
 using namespace cpp11;
 
@@ -8,7 +9,6 @@ using namespace cpp11;
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 #define days_in_year(year) (isleap(year) ? 366 : 365)
 #define days_in_month(mon, yr) ((mon == 1 && isleap(1900+yr)) ? 29 : month_days[mon])
-#define MAX_DTYPE_SIZE 255
 #define DT_UNITS_SIZE 12
 #define DIFFTIME_SIZE 5
 
@@ -64,7 +64,7 @@ union conversion_t {
   double    f8;
   complex32 c8;
   complex64 c16;
-  char      S[MAX_DTYPE_SIZE];
+  char      S[BLOSC_MAX_TYPESIZE];
 };
 
 bool convert_data(uint8_t *input, SEXP input_sexp, int rtype, int n, blosc_dtype dtype,
@@ -130,7 +130,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
       bz *= 10;
       bz += s;
     }
-    if (bz < 1 || bz > MAX_DTYPE_SIZE) stop("Invalid byte size");
+    if (bz < 1 || bz > BLOSC_MAX_TYPESIZE) stop("Invalid byte size");
     dt.byte_size = (uint8_t)bz;
     
     
@@ -302,9 +302,9 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
       na_str = std::string(CHAR(STRING_PTR_RO(new_na_value)[0]));
     }
     writable::strings res_str((R_xlen_t) n);
-    char buffer[MAX_DTYPE_SIZE + 1];
+    char buffer[BLOSC_MAX_TYPESIZE + 1];
     for (int i = 0; i < n; i ++) {
-      memset(buffer, 0x00, MAX_DTYPE_SIZE + 1);
+      memset(buffer, 0x00, BLOSC_MAX_TYPESIZE + 1);
       memcpy(buffer, src + i * dt.byte_size, dt.byte_size);
       res_str[i] = std::string(buffer);
       if (res_str[i] == na_str) res_str[i] = NA_STRING;
@@ -324,9 +324,9 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     writable::strings res_str((R_xlen_t) n/4);
     
     writable::integers val((R_xlen_t)1);
-    char buffer[MAX_DTYPE_SIZE + 1];
+    char buffer[BLOSC_MAX_TYPESIZE + 1];
     for (int i = 0; i < n/4; i ++) {
-      memset(buffer, 0x00, MAX_DTYPE_SIZE + 1);
+      memset(buffer, 0x00, BLOSC_MAX_TYPESIZE + 1);
       for (int j = 0; j < dt.byte_size; j++) {
         val[0] = ((int *)src)[i*dt.byte_size + j];
         sexp code = intToUtf8(val);
@@ -777,7 +777,7 @@ void byte_swap(uint8_t * data, blosc_dtype dtype, uint32_t n) {
     n2 = n*2;
   }
   if (bs == 1) return; // Nothing to swap
-  uint8_t buffer[MAX_DTYPE_SIZE];
+  uint8_t buffer[BLOSC_MAX_TYPESIZE];
   for (uint32_t i = 0; i < n2; i++) {
     for (int j = 0; j < bs; j++) {
       buffer[j] = data[(i + 1) * bs - j - 1];
