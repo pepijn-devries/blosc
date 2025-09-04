@@ -1,4 +1,4 @@
-# blosc 0.0.6.0002
+# blosc 0.0.6.0003
 
 * Added support for encoding and decoding string
   data types
