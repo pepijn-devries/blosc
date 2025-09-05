@@ -146,7 +146,7 @@ values. This is also what `R` does for `NA` values. Other software may use
 different values to represent missing values. Also, some data types have
 insufficient storage capacity to store `R` `NA` values
 
-The examples below show how you can use custom values to prepresent missing
+The examples below show how you can use custom values to represent missing
 values.
 
 ```{r missing}

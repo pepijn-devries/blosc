@@ -1,8 +1,9 @@
-# blosc 0.0.6.0004
+# blosc 0.0.7
 
 * Added support for encoding and decoding string
   data types
 * Corrected configure script
+* Corrected some typos
 
 # blosc 0.0.6
 
