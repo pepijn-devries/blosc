@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "blosc",
+  "short_name": "blosc",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
