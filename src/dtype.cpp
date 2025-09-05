@@ -681,7 +681,7 @@ bool convert_data(uint8_t *input, SEXP input_data, int rtype, int n,
         stop("Failed to convert data");
       }
     } else if (rtype == STRSXP) {
-      strings id({input_data});
+      strings id(input_data);
       int len = (int)std::string(id[i]).size();
       
       std::string s(CHAR(NA_STRING));
