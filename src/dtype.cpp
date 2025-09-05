@@ -417,9 +417,10 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
         }
         if (target_unit >= 0) break;
       }
-      if (target_unit < 0) stop("Failed to convert to appropriate unit");
+      if (target_unit < 0 || end < 0 || start < 0)
+        stop("Failed to convert to appropriate unit");
       
-      unt_conv = to_seconds[end]/to_seconds[start];
+      else unt_conv = to_seconds[end]/to_seconds[start];
     }
     
     unts[0] = difftime_units[target_unit];

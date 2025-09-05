@@ -1,3 +1,7 @@
+# blosc 0.0.8.0001
+
+* Solved sanitiser issue
+
 # blosc 0.0.8
 
 * Added support for encoding and decoding string
