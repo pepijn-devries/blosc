@@ -48,8 +48,15 @@ test_that("difftime is accepted", {
 
 test_that("difftime is converted when unit is not known by R", {
   expect_true({
+    ## Converts raw data in Zarr 'dtype' format to an R type.
+    ## The dtype specifies the unit in nanoseconds, a unit
+    ## that 'difftime' does not understand. The code should
+    ## automatically convert the number to a unit it does
+    ## understand
     abs(1 - as.numeric(
       dtype_to_r(
+        ## Raw data and dtype '<m8[ns]' is little endian 8 bit integer
+        ## reflecting time difference in nanoseconds.
         as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)), "<m8[ns]"),
       units = "secs") /
         1e+9) < 1e-6
