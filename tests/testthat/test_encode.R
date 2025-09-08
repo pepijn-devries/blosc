@@ -50,7 +50,8 @@ test_that("difftime is converted when unit is not known by R", {
   expect_true({
     abs(1 - as.numeric(
       dtype_to_r(
-        as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)), "<m8[ns]")) /
+        as.raw(c(0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)), "<m8[ns]"),
+      units = "secs") /
         1e+9) < 1e-6
   })
 })
