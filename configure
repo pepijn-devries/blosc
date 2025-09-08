@@ -3941,8 +3941,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 have_blosc=no
-BLOSC_CXXFLAGS=""
-BLOSC_LIBS="-lblosc"
+
+PKG_CONFIG_NAME="blosc"
+PKG_LIBS="-lblosc"
+PKG_CFLAGS=""
 
 
 

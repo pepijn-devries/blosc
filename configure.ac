@@ -19,8 +19,10 @@ AC_LANG(C++)
 AC_PROG_CPP
 
 have_blosc=no
-BLOSC_CXXFLAGS=""
-BLOSC_LIBS="-lblosc"
+
+PKG_CONFIG_NAME="blosc"
+PKG_LIBS="-lblosc"
+PKG_CFLAGS=""
 
 PKG_PROG_PKG_CONFIG
 
