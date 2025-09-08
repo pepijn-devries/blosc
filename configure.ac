@@ -7,9 +7,32 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
-CC=`"${R_HOME}/bin/R" CMD config CC`
-CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+AC_LANG(C++)
+AC_PROG_CPP
+
+have_blosc=no
+BLOSC_CXXFLAGS=""
+BLOSC_LIBS="-lblosc"
+
+PKG_PROG_PKG_CONFIG
+
+if test [ -n "$PKG_CONFIG" ] ; then
+  AC_MSG_CHECKING([pkg-config for blosc])
+  if $PKG_CONFIG --exists blosc; then
+    have_blosc=yes
+    BLOSC_CXXFLAGS=`"${PKG_CONFIG}" --cflags blosc`
+    BLOSC_LIBS=`"${PKG_CONFIG}" --libs blosc`
+  fi
+  AC_MSG_RESULT([${have_blosc}])
+fi
+
+if test "x${have_blosc}" = xno; then
+  AC_CHECK_HEADERS(blosc.h, [have_blosc=yes], [AC_MSG_ERROR(The blosc library headers are required.
+  )])
+fi
 
 AC_SEARCH_LIBS(blosc, [], [AC_MSG_ERROR(The blosc library is required.)])
 AC_CHECK_HEADERS(blosc.h, [], [AC_MSG_ERROR(The blosc library headers are required.)])
