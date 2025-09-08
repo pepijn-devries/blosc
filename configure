@@ -4,8 +4,6 @@
 # Anticonf (tm) script by Jeroen Ooms (2024)
 PKG_DEB_NAME="libblosc-dev"
 PKG_RPM_NAME="blosc-devel"
-PKG_CSW_NAME="blosc-dev"
-PKG_MACOS_NAME="c-blosc"
 
 PKG_TEST_HEADER="<blosc.h>"
 
@@ -65,10 +63,8 @@ if [ $? -ne 0 ]; then
   echo "Configuration failed to find the BLOSC engine library. Try installing:"
   echo " * deb: $PKG_DEB_NAME (Debian / Ubuntu)"
   echo " * rpm: $PKG_RPM_NAME (Fedora, EPEL)"
-  echo " * brew: $PKG_MACOS_NAME (OSX)"
-  echo " * csw: $PKG_CSW_NAME (Solaris)"
-  echo "On MacOS you can call from R:"
-  echo "'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'"
+  echo " * MacOS: Call from R:"
+  echo "    'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'"
   echo "-------------------------- [ERROR MESSAGE] ---------------------------"
   cat configure.log
   echo "--------------------------------------------------------------------"

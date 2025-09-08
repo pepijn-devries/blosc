@@ -1,3 +1,7 @@
+# blosc 0.0.9.0001
+
+* Addressed CRAN check issues
+
 # blosc 0.0.9
 
 * Solved sanitiser issue
