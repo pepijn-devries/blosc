@@ -1,5 +1,9 @@
-AC_INIT
-AC_CONFIG_SRCDIR(["blosc"])
+AC_INIT(["blosc"], [see.DESCRIPTION.file], [https://github.com/pepijn-devries/blosc/issues])
+AC_CONFIG_SRCDIR([src/compress.cpp])
+AC_CONFIG_AUX_DIR([tools])
+AC_CANONICAL_HOST
+
+m4_include([tools/pkg.m4])
 
 # Find the compiler and compiler flags used by R.
 : ${R_HOME=`R RHOME`}
@@ -7,9 +11,10 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
-CXX=`"${R_HOME}/bin/R" CMD config CXX`
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
-CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+RBIN="${R_HOME}/bin/R"
+CXX=`"${RBIN}" CMD config CXX`
+CXXFLAGS=`"${RBIN}" CMD config CXXFLAGS`
+CPPFLAGS=`"${RBIN}" CMD config CPPFLAGS`
 AC_LANG(C++)
 AC_PROG_CPP
 
