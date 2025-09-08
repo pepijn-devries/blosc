@@ -11,14 +11,14 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
+
+# Find the compiler and compiler flags to use
 RBIN="${R_HOME}/bin/R"
 CXX=`"${RBIN}" CMD config CXX`
 CXXFLAGS=`"${RBIN}" CMD config CXXFLAGS`
 CPPFLAGS=`"${RBIN}" CMD config CPPFLAGS`
 AC_LANG(C++)
 AC_PROG_CPP
-
-have_blosc=no
 
 m4_pattern_allow([PKG_CONFIG_NAME])
 PKG_CONFIG_NAME="blosc"
@@ -27,16 +27,7 @@ PKG_CFLAGS=""
 
 PKG_PROG_PKG_CONFIG
 
-if test [ -n "$PKG_CONFIG" ] ; then
-  AC_MSG_CHECKING([pkg-config for blosc])
-  if $PKG_CONFIG --exists blosc; then
-    have_blosc=yes
-    BLOSC_CXXFLAGS=`"${PKG_CONFIG}" --cflags blosc`
-    BLOSC_LIBS=`"${PKG_CONFIG}" --libs blosc`
-  fi
-  AC_MSG_RESULT([${have_blosc}])
-fi
-
+# Check if building against a custom installation of blosc or system blosc
 if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
   if test [ -n "$PKG_CONFIG" ] ; then
     # Check if blosc is installed
@@ -50,29 +41,35 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
       ;;
     esac
   fi
+  if test "x${PKGCONFIG_CFLAGS}${PKGCONFIG_LIBS}" = x; then
+    case "${host_os}" in
+      darwin*)
+      echo "TODO need the brew alternative here"
+    ;;
+    esac
+  else
+    echo "Found pkg-config cflags and libs!"
+    PKG_CFLAGS="${PKGCONFIG_CFLAGS}"
+    PKG_LIBS="${PKGCONFIG_LIBS}"
+  fi
+else
+  echo "Found INCLUDE_DIR and/or LIB_DIR!"
+  PKG_CFLAGS="-I${INCLUDE_DIR} ${PKG_CFLAGS}"
+  PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
-
-if test "x${have_blosc}" = xno; then
-  AC_CHECK_HEADERS(blosc.h, [have_blosc=yes], [AC_MSG_ERROR(
-    [The blosc library headers are required.]
-  )])
-fi
-
-AC_SEARCH_LIBS(blosc, [], [AC_MSG_ERROR(The blosc library is required.)])
-AC_CHECK_HEADERS(blosc.h, [], [AC_MSG_ERROR(The blosc library headers are required.)])
-
-# Write the flags into the src/Makevars file.
-AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS}"])
-AC_SUBST([PKG_LIBS], ["${LIBS} ${PKG_LIBS}"])
-AC_CONFIG_FILES([src/Makevars])
-AC_OUTPUT
 
 echo "
   --------------------------------------------------
-  Configuration for ${PACKAGE_NAME} ${PACKAGE_VERSION}
+  Configuration for ${PACKAGE_NAME}
 
-    cppflags: ${CPPFLAGS} ${PKG_CPPFLAGS}
+    cppflags: ${CPPFLAGS}
     libs:     ${PKG_LIBS}
 
   --------------------------------------------------
 "
+AC_SUBST([PKG_CFLAGS], ["${PKG_CFLAGS}"])
+AC_SUBST([PKG_LIBS], ["${PKG_LIBS}"])
+AC_CONFIG_FILES([src/Makevars])
+
+AC_OUTPUT
+
