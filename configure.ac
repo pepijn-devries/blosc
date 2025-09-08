@@ -30,7 +30,8 @@ if test [ -n "$PKG_CONFIG" ] ; then
 fi
 
 if test "x${have_blosc}" = xno; then
-  AC_CHECK_HEADERS(blosc.h, [have_blosc=yes], [AC_MSG_ERROR(The blosc library headers are required.
+  AC_CHECK_HEADERS(blosc.h, [have_blosc=yes], [AC_MSG_ERROR(
+    [The blosc library headers are required.]
   )])
 fi
 
