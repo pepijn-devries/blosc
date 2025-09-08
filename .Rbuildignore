@@ -13,4 +13,3 @@ windows
 ^codecov\.yml$
 ^doc$
 ^Meta$
-^configure.ac$
