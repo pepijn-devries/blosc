@@ -1,4 +1,4 @@
-AC_INIT(["blosc"], [see.DESCRIPTION.file], [https://github.com/pepijn-devries/blosc/issues])
+AC_INIT([blosc], [see.DESCRIPTION.file], [https://github.com/pepijn-devries/blosc/issues])
 AC_CONFIG_SRCDIR([src/compress.cpp])
 AC_CONFIG_AUX_DIR([tools])
 AC_CANONICAL_HOST
@@ -20,6 +20,7 @@ AC_PROG_CPP
 
 have_blosc=no
 
+m4_pattern_allow([PKG_CONFIG_NAME])
 PKG_CONFIG_NAME="blosc"
 PKG_LIBS="-lblosc"
 PKG_CFLAGS=""
@@ -34,6 +35,21 @@ if test [ -n "$PKG_CONFIG" ] ; then
     BLOSC_LIBS=`"${PKG_CONFIG}" --libs blosc`
   fi
   AC_MSG_RESULT([${have_blosc}])
+fi
+
+if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
+  if test [ -n "$PKG_CONFIG" ] ; then
+    # Check if blosc is installed
+    PKGCONFIG_CFLAGS=`"${PKG_CONFIG}" --cflags --silence-errors "${PKG_CONFIG_NAME}"`
+    case "${host_os}" in
+      darwin*)
+        PKGCONFIG_LIBS=`"${PKG_CONFIG}" --libs --static "${PKG_CONFIG_NAME}"`
+      ;;
+      *)
+        PKGCONFIG_LIBS=`"${PKG_CONFIG}" --libs "${PKG_CONFIG_NAME}"`
+      ;;
+    esac
+  fi
 fi
 
 if test "x${have_blosc}" = xno; then
