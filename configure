@@ -14,6 +14,9 @@ PKG_CONFIG_NAME="blosc"
 if [ `command -v pkg-config` ]; then
   PKGCONFIG_CFLAGS=`pkg-config --cflags --silence-errors ${PKG_CONFIG_NAME}`
   PKGCONFIG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME}`
+  if ![ "$PKGCONFIG_LIBS" ]; then
+    PKGCONFIG_LIBS=`pkg-config --static --libs ${PKG_CONFIG_NAME}`
+  fi
 fi
 
 if [ "$INCLUDE_DIR" ] || [ "$LIB_DIR" ]; then
