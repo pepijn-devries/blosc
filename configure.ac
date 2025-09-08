@@ -23,7 +23,7 @@ AC_PROG_CPP
 m4_pattern_allow([PKG_CONFIG_NAME])
 PKG_CONFIG_NAME="blosc"
 PKG_LIBS="-lblosc"
-PKG_CFLAGS=""
+PKG_CPPFLAGS=""
 
 PKG_PROG_PKG_CONFIG
 
@@ -49,12 +49,12 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
     esac
   else
     echo "Found pkg-config cflags and libs!"
-    PKG_CFLAGS="${PKGCONFIG_CFLAGS}"
+    PKG_CPPFLAGS="${PKGCONFIG_CFLAGS}"
     PKG_LIBS="${PKGCONFIG_LIBS}"
   fi
 else
   echo "Found INCLUDE_DIR and/or LIB_DIR!"
-  PKG_CFLAGS="-I${INCLUDE_DIR} ${PKG_CFLAGS}"
+  PKG_CPPFLAGS="-I${INCLUDE_DIR} ${PKG_CPPFLAGS}"
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
@@ -62,12 +62,12 @@ echo "
   --------------------------------------------------
   Configuration for ${PACKAGE_NAME}
 
-    cppflags: ${CPPFLAGS}
+    cppflags: ${PKG_CPPFLAGS}
     libs:     ${PKG_LIBS}
 
   --------------------------------------------------
 "
-AC_SUBST([PKG_CFLAGS], ["${PKG_CFLAGS}"])
+AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS}"])
 AC_SUBST([PKG_LIBS], ["${PKG_LIBS}"])
 AC_CONFIG_FILES([src/Makevars])
 
