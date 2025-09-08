@@ -25,7 +25,6 @@ elif [ "$PKGCONFIG_CFLAGS" ] || [ "$PKGCONFIG_LIBS" ]; then
   PKG_CXXFLAGS=${PKGCONFIG_CFLAGS}
   PKG_LIBS=${PKGCONFIG_LIBS}
 else
-  echo "Did not find pkg-config cflags and libs, trying to guess them!"
   cpre=''
   for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/arm64 opt/R/x86_64 /sw; do
     if test -e "${pre}/include/blosc.h"; then
@@ -60,7 +59,8 @@ int main() {
 # Customize the error
 if [ $? -ne 0 ]; then
   echo "--------------------------- [ANTICONF] --------------------------------"
-  echo "Configuration failed to find the BLOSC engine library. Try installing:"
+  echo "Configuration failed to find the BLOSC engine library. Try installing"
+  echo "the following, then try again:"
   echo " * deb: $PKG_DEB_NAME (Debian / Ubuntu)"
   echo " * rpm: $PKG_RPM_NAME (Fedora, EPEL)"
   echo " * MacOS: Call from R:"
