@@ -47,9 +47,9 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      # - name: Install MacOS deps
-      #   if: runner.os == 'macOS'
-      #   run: "sudo Rscript -e \"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""
+      - name: Install MacOS deps
+        if: runner.os == 'macOS'
+        run: "sudo Rscript -e \"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

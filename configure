@@ -63,7 +63,7 @@ if [ $? -ne 0 ]; then
   echo "the following, then try again:"
   echo " * deb: $PKG_DEB_NAME (Debian / Ubuntu)"
   echo " * rpm: $PKG_RPM_NAME (Fedora, EPEL)"
-  echo " * MacOS: Call from R:"
+  echo " * MacOS: call from R:"
   echo "    'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'"
   echo "-------------------------- [ERROR MESSAGE] ---------------------------"
   cat configure.log
