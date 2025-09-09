@@ -71,6 +71,12 @@ else
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
+# check that the version of blosc works with R package.
+AC_MSG_CHECKING([whether the blosc version will work in R package])
+blosc_ver_ok=no
+${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && libgit2_ver_ok=yes
+AC_MSG_RESULT([${blosc_ver_ok}])
+
 echo "
   --------------------------------------------------
   Configuration for ${PACKAGE_NAME}

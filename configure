@@ -3736,6 +3736,14 @@ else
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
+# check that the version of blosc works with R package.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc version will work in R package" >&5
+printf %s "checking whether the blosc version will work in R package... " >&6; }
+blosc_ver_ok=no
+${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && libgit2_ver_ok=yes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_ver_ok}" >&5
+printf "%s\n" "${blosc_ver_ok}" >&6; }
+
 echo "
   --------------------------------------------------
   Configuration for ${PACKAGE_NAME}
