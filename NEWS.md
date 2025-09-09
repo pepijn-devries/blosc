@@ -1,4 +1,4 @@
-# blosc 0.0.9.0002
+# blosc 0.1.0
 
 * Addressed CRAN check issues
 * Switched from anticonf to autoconf setup
