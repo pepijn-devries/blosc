@@ -3737,12 +3737,48 @@ else
 fi
 
 # check that the version of blosc works with R package.
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc version will work in R package" >&5
-printf %s "checking whether the blosc version will work in R package... " >&6; }
-blosc_ver_ok=no
-${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && libgit2_ver_ok=yes
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_ver_ok}" >&5
-printf "%s\n" "${blosc_ver_ok}" >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc will work in R package" >&5
+printf %s "checking whether the blosc will work in R package... " >&6; }
+blosc_inst_ok=no
+${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_inst_ok}" >&5
+printf "%s\n" "${blosc_inst_ok}" >&6; }
+
+if test "x${blosc_inst_ok}" = xno; then
+    echo "
+  -----------------------------------------------------------------------
+
+   Configuration failed to find 'blosc.h'.
+
+   Try installing:
+     * deb: libblosc-dev   (Debian, Ubuntu, etc)
+     * rpm: blosc-devel (Fedora, CentOS, RHEL)
+     * MacOS: call from R:
+         'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'
+   and try again.
+
+   If the blosc library is installed on your system but the R package
+   configuration is unable to find it, you can specify the include and
+   lib path to blosc with:
+
+   given you downloaded a tar-gz archive:
+   R CMD INSTALL blosc-.tar.gz --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+
+   or cloned the GitHub blosc repository into a directory:
+   R CMD INSTALL blosc/ --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+
+   or download and install blosc in R using
+   install.packages('blosc', type='source', configure.vars='LIB_DIR=-L/path/to/libs INCLUDE_DIR=-I/path/to/headers')
+
+  -----------------------------------------------------------------------
+
+"
+
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
+as_fn_error $? "package dependency requirements 'blosc' could not be satisfied.
+See 'config.log' for more details" "$LINENO" 5; }
+fi
 
 echo "
   --------------------------------------------------

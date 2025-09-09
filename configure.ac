@@ -72,10 +72,43 @@ else
 fi
 
 # check that the version of blosc works with R package.
-AC_MSG_CHECKING([whether the blosc version will work in R package])
-blosc_ver_ok=no
-${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && libgit2_ver_ok=yes
-AC_MSG_RESULT([${blosc_ver_ok}])
+AC_MSG_CHECKING([whether the blosc will work in R package])
+blosc_inst_ok=no
+${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
+AC_MSG_RESULT([${blosc_inst_ok}])
+
+if test "x${blosc_inst_ok}" = xno; then
+    echo "
+  -----------------------------------------------------------------------
+
+   Configuration failed to find 'blosc.h'.
+
+   Try installing:
+     * deb: libblosc-dev   (Debian, Ubuntu, etc)
+     * rpm: blosc-devel (Fedora, CentOS, RHEL)
+     * MacOS: call from R:
+         'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'
+   and try again.
+
+   If the blosc library is installed on your system but the R package
+   configuration is unable to find it, you can specify the include and
+   lib path to blosc with:
+
+   given you downloaded a tar-gz archive:
+   R CMD INSTALL blosc-.tar.gz --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+
+   or cloned the GitHub blosc repository into a directory:
+   R CMD INSTALL blosc/ --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+
+   or download and install blosc in R using
+   install.packages('blosc', type='source', configure.vars='LIB_DIR=-L/path/to/libs INCLUDE_DIR=-I/path/to/headers')
+
+  -----------------------------------------------------------------------
+
+"
+
+    AC_MSG_FAILURE([package dependency requirements 'blosc' could not be satisfied.])
+fi
 
 echo "
   --------------------------------------------------
