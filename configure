@@ -3740,7 +3740,7 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc will work in R package" >&5
 printf %s "checking whether the blosc will work in R package... " >&6; }
 blosc_inst_ok=no
-${CXX} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
+${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_inst_ok}" >&5
 printf "%s\n" "${blosc_inst_ok}" >&6; }
 
