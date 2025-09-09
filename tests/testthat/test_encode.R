@@ -39,6 +39,17 @@ test_that("POSXlt is accepted", {
   })
 })
 
+test_that("units are initialised", {
+  expect_identical(
+    blosc:::check_dt_units(),
+    c("W", "D", "h", "m", "s", "ms", "us", "μs", "ns", "ps", "fs", "as")
+  )
+})
+
+test_that("unit is extracted correctly from dtype code", {
+  expect_identical(blosc:::dtype_to_list_("<m8[ns]")$unit, "ns")
+})
+
 test_that("difftime is accepted", {
   expect_true({
     all(r_to_dtype(as.difftime(1, units = "days"), dtype = "<m8[D]") == 

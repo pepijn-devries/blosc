@@ -27,6 +27,13 @@ extern "C" SEXP _blosc_blosc_decompress_dat(SEXP data) {
   END_CPP11
 }
 // dtype.cpp
+strings check_dt_units();
+extern "C" SEXP _blosc_check_dt_units() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(check_dt_units());
+  END_CPP11
+}
+// dtype.cpp
 list dtype_to_list_(std::string dtype);
 extern "C" SEXP _blosc_dtype_to_list_(SEXP dtype) {
   BEGIN_CPP11
@@ -53,6 +60,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_blosc_blosc_compress_dat",   (DL_FUNC) &_blosc_blosc_compress_dat,   5},
     {"_blosc_blosc_decompress_dat", (DL_FUNC) &_blosc_blosc_decompress_dat, 1},
     {"_blosc_blosc_info_",          (DL_FUNC) &_blosc_blosc_info_,          1},
+    {"_blosc_check_dt_units",       (DL_FUNC) &_blosc_check_dt_units,       0},
     {"_blosc_dtype_to_list_",       (DL_FUNC) &_blosc_dtype_to_list_,       1},
     {"_blosc_dtype_to_r_",          (DL_FUNC) &_blosc_dtype_to_r_,          3},
     {"_blosc_r_to_dtype_",          (DL_FUNC) &_blosc_r_to_dtype_,          3},

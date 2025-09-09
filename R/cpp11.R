@@ -12,6 +12,10 @@ blosc_decompress_dat <- function(data) {
   .Call(`_blosc_blosc_decompress_dat`, data)
 }
 
+check_dt_units <- function() {
+  .Call(`_blosc_check_dt_units`)
+}
+
 dtype_to_list_ <- function(dtype) {
   .Call(`_blosc_dtype_to_list_`, dtype)
 }

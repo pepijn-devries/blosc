@@ -9,7 +9,6 @@ using namespace cpp11;
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 #define days_in_year(year) (isleap(year) ? 366 : 365)
 #define days_in_month(mon, yr) ((mon == 1 && isleap(1900+yr)) ? 29 : month_days[mon])
-#define DT_UNITS_SIZE 12
 #define DIFFTIME_SIZE 5
 
 static const int month_days[12] =
@@ -102,6 +101,16 @@ void getYM(double d, int64_t &mon, int64_t &Y) {
   Y = y + 1900;
 }
 
+[[cpp11::register]]
+strings check_dt_units() {
+  R_xlen_t n = std::size(dt_units);
+  writable::strings result(n);
+  for (int i = 0; i < (int)n; i++) {
+    result[i] = dt_units[i];
+  }
+  return result;
+}
+
 blosc_dtype prepare_dtype(std::string dtype) {
   blosc_dtype dt;
   int dlen = dtype.length();
@@ -160,7 +169,7 @@ blosc_dtype prepare_dtype(std::string dtype) {
     dt.unit_conversion = -1;
     if (dt.unit.length() > 0) {
       if (dt.main_type == 'M' || dt.main_type == 'm') {
-        for (int j = 0; j < DT_UNITS_SIZE; j++) {
+        for (int j = 0; j < (int)std::size(dt_units); j++) {
           if (dt.unit == dt_units[j]) {
             dt.unit_conversion = to_seconds[j];
             break;
@@ -406,7 +415,7 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     int start = -1, end = -1;
     if (target_unit < 0) {
       
-      for (int j = DT_UNITS_SIZE - 1; j >= 0; j--) {
+      for (int j = (int)std::size(dt_units) - 1; j >= 0; j--) {
         if (!dt.unit.compare(dt_units[j])) start = j;
         for (int k = 0; k < DIFFTIME_SIZE; k++) {
           if (!std::string(difftime_units_cor[k]).compare(dt_units[j])) {

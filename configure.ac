@@ -45,7 +45,7 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
     case "${host_os}" in
       darwin*)
       cpre=''
-      for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/arm64 opt/R/x86_64 /sw; do
+      for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/$(uname -m) /sw; do
         if test -e "${pre}/include/blosc.h"; then
           cpre=${pre}; break
         fi
