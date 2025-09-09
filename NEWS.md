@@ -1,3 +1,11 @@
+# blosc 0.0.9.0001
+
+* Addressed CRAN check issues
+
+# blosc 0.0.9
+
+* Solved sanitiser issue
+
 # blosc 0.0.8
 
 * Added support for encoding and decoding string

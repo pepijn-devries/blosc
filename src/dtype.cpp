@@ -407,9 +407,9 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
     if (target_unit < 0) {
       
       for (int j = DT_UNITS_SIZE - 1; j >= 0; j--) {
-        if (dt.unit == dt_units[j]) start = j;
+        if (!dt.unit.compare(dt_units[j])) start = j;
         for (int k = 0; k < DIFFTIME_SIZE; k++) {
-          if (difftime_units_cor[k] == dt_units[j]) {
+          if (!std::string(difftime_units_cor[k]).compare(dt_units[j])) {
             target_unit = k;
             end = j;
             break;
@@ -417,9 +417,11 @@ sexp dtype_to_r_(raws data, std::string dtype, sexp na_value) {
         }
         if (target_unit >= 0) break;
       }
-      if (target_unit < 0) stop("Failed to convert to appropriate unit");
+      if (target_unit < 0 || end < 0 || start < 0)
+        stop("Failed to convert [%s] to appropriate difftime unit",
+             dt.unit.c_str());
       
-      unt_conv = to_seconds[end]/to_seconds[start];
+      else unt_conv = to_seconds[end]/to_seconds[start];
     }
     
     unts[0] = difftime_units[target_unit];
