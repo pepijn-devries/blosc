@@ -84,7 +84,7 @@ if test "x${blosc_inst_ok}" = xno; then
    Configuration failed to find 'blosc.h'.
 
    Try installing:
-     * deb: libblosc-dev   (Debian, Ubuntu, etc)
+     * deb: libblosc-dev (Debian, Ubuntu, etc)
      * rpm: blosc-devel (Fedora, CentOS, RHEL)
      * MacOS: call from R:
          'source(\"https://mac.R-project.org/bin/install.R\");install.libs(\"blosc\")'
@@ -95,13 +95,14 @@ if test "x${blosc_inst_ok}" = xno; then
    lib path to blosc with:
 
    given you downloaded a tar-gz archive:
-   R CMD INSTALL blosc-.tar.gz --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+   
+     R CMD INSTALL blosc-.tar.gz --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
 
    or cloned the GitHub blosc repository into a directory:
-   R CMD INSTALL blosc/ --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
+     R CMD INSTALL blosc/ --configure-vars='INCLUDE_DIR=/path/to/include LIB_DIR=/path/to/lib'
 
    or download and install blosc in R using
-   install.packages('blosc', type='source', configure.vars='LIB_DIR=-L/path/to/libs INCLUDE_DIR=-I/path/to/headers')
+     install.packages('blosc', type='source', configure.vars='LIB_DIR=-L/path/to/libs INCLUDE_DIR=-I/path/to/headers')
 
   -----------------------------------------------------------------------
 
