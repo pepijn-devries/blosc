@@ -72,7 +72,7 @@ else
 fi
 
 # check that the version of blosc works with R package.
-AC_MSG_CHECKING([whether the blosc will work in R package])
+AC_MSG_CHECKING([whether the blosc library will work in R package])
 blosc_inst_ok=no
 ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
 AC_MSG_RESULT([${blosc_inst_ok}])

@@ -3737,8 +3737,8 @@ else
 fi
 
 # check that the version of blosc works with R package.
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc will work in R package" >&5
-printf %s "checking whether the blosc will work in R package... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the blosc library will work in R package" >&5
+printf %s "checking whether the blosc library will work in R package... " >&6; }
 blosc_inst_ok=no
 ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_inst_ok}" >&5
