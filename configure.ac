@@ -58,9 +58,12 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
           PKG_LIBS="-L${cpre}/lib -lblosc -llz4 -lzstd -lz"
         fi
       else
+        AC_MSG_CHECKING([if blosc library can be installed from mac.R-project.org])
+
         $(R_HOME)/bin/Rscript -e "source('https://mac.R-project.org/bin/install.R');install.libs('blosc')"
         PKGCONFIG_CFLAGS=`"${PKG_CONFIG}" --cflags --silence-errors "${PKG_CONFIG_NAME}"`
         PKGCONFIG_LIBS=`"${PKG_CONFIG}" --libs --static "${PKG_CONFIG_NAME}"`
+        AC_MSG_RESULT([TODO])
 
       fi
     ;;
