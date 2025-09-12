@@ -67,7 +67,7 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
           AC_MSG_RESULT([no])
         else
           AC_MSG_RESULT([yes])
-
+        fi
       fi
     ;;
     esac

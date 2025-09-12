@@ -3735,7 +3735,7 @@ printf "%s\n" "no" >&6; }
         else
           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 printf "%s\n" "yes" >&6; }
-
+        fi
       fi
     ;;
     esac
