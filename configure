@@ -4620,6 +4620,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 
 #include <blosc.h>
 int main(void) {
+  blosc_init();
   int n = blosc_get_nthreads();
   return 0;
 }
