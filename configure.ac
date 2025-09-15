@@ -120,6 +120,11 @@ echo "
 
   --------------------------------------------------
 "
+
+## check headers only after we're done with pkg-config
+AC_CHECK_HEADERS([blosc.h],, [AC_MSG_ERROR([blosc headers are not usable.
+Please make sure you have installed development files for blosc.])])
+
 AC_SUBST([PKG_CPPFLAGS], ["${PKG_CPPFLAGS}"])
 AC_SUBST([PKG_LIBS], ["${PKG_LIBS}"])
 AC_CONFIG_FILES([src/Makevars])
