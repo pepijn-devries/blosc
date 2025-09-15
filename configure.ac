@@ -71,7 +71,7 @@ else
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
-if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
+if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
     echo "
   -----------------------------------------------------------------------
 
