@@ -125,6 +125,8 @@ blosc_inst_ok=no
 ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&1 && blosc_inst_ok=yes
 AC_MSG_RESULT([${blosc_inst_ok}])
 
+LDFLAGS="${PKG_CPPFLAGS}"
+LIBS="${PKG_LIBS}"
 AC_MSG_CHECKING([whether blosc programs can be compiled])
 AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include "blosc.h"

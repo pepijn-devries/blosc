@@ -4613,6 +4613,8 @@ ${CXX} ${CPPFLAGS} ${PKG_CPPFLAGS} ${CFLAGS} -E tools/version.cpp >/dev/null 2>&
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${blosc_inst_ok}" >&5
 printf "%s\n" "${blosc_inst_ok}" >&6; }
 
+LDFLAGS="${PKG_CPPFLAGS}"
+LIBS="${PKG_LIBS}"
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether blosc programs can be compiled" >&5
 printf %s "checking whether blosc programs can be compiled... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
