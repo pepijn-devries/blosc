@@ -4130,7 +4130,7 @@ if test "x${PKG_CPPFLAGS}" = x; then
       ls "${R_HOME}/" -LR
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: attempting to install blosc from mac.R-project.org" >&5
 printf "%s\n" "$as_me: attempting to install blosc from mac.R-project.org" >&6;}
-      sudo "${R_HOME}/bin/Rscript" -e \"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""`
+      sudo "${R_HOME}/bin/Rscript" -e "\"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""`
     ;;
   esac
 fi

@@ -76,7 +76,7 @@ if test "x${PKG_CPPFLAGS}" = x; then
     darwin*)
       ls "${R_HOME}/" -LR
       AC_MSG_NOTICE([attempting to install blosc from mac.R-project.org])
-      sudo "${R_HOME}/bin/Rscript" -e \"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""`
+      sudo "${R_HOME}/bin/Rscript" -e "\"source('https://mac.R-project.org/bin/install.R');install.libs('blosc')\""`
     ;;
   esac
 fi
