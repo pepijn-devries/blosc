@@ -71,7 +71,7 @@ else
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
-if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
+if test "x${PKG_CPPFLAGS}" = x; then
   AC_MSG_NOTICE([Debugging message])
   case "${host_os}" in
     darwin*)

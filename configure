@@ -4124,7 +4124,7 @@ else
   PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS}"
 fi
 
-if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
+if test "x${PKG_CPPFLAGS}" = x; then
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Debugging message" >&5
 printf "%s\n" "$as_me: Debugging message" >&6;}
   case "${host_os}" in
