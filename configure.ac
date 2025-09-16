@@ -72,6 +72,7 @@ else
 fi
 
 if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
+  AC_MSG_NOTICE([Debugging message])
   case "${host_os}" in
     darwin*)
       AC_MSG_NOTICE([attempting to install blosc from mac.R-project.org])
