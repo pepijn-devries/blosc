@@ -57,7 +57,11 @@ if test "x${PKG_CPPFLAGS}" = x; then
     darwin*)
       AC_MSG_NOTICE([attempting to install blosc from mac.R-project.org])
       SILENT_INSTALL_R=1
-      sudo "${R_HOME}/Rscript" -e "source('https://mac.R-project.org/bin/install.R');install.libs('blosc')"
+      blosc_mac_ok=no
+      sudo "${R_HOME}/Rscript" -e "source('https://mac.R-project.org/bin/install.R');install.libs('blosc')" && blosc_mac_ok=yes
+      AC_MSG_CHECKING([Installed from mac.R-project.org])
+      AC_MSG_RESULT([${blosc_mac_ok}])
+
       cpre=''
       for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/$(uname -m) /sw; do
         if test -e "${pre}/include/blosc.h"; then
