@@ -4618,7 +4618,7 @@ printf %s "checking whether blosc programs can be compiled... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-#include <blosc.h>
+#include "blosc.h"
 int main(void) {
   blosc_init();
   int n = blosc_get_nthreads();

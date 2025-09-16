@@ -127,7 +127,7 @@ AC_MSG_RESULT([${blosc_inst_ok}])
 
 AC_MSG_CHECKING([whether blosc programs can be compiled])
 AC_LINK_IFELSE([AC_LANG_SOURCE([
-#include <blosc.h>
+#include "blosc.h"
 int main(void) {
   blosc_init();
   int n = blosc_get_nthreads();
