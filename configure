@@ -4125,6 +4125,16 @@ else
 fi
 
 if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
+  case "${host_os}" in
+    darwin*)
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: attempting to install blosc from mac.R-project.org" >&5
+printf "%s\n" "$as_me: attempting to install blosc from mac.R-project.org" >&6;}
+      `"sudo ${RBIN}Rscript" -e source('https://mac.R-project.org/bin/install.R');install.libs('blosc')`
+    ;;
+  esac
+fi
+
+if test "x${PKG_CPPFLAGS}${PKG_LIBS}" = x; then
     echo "
   -----------------------------------------------------------------------
 
