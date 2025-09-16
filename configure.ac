@@ -22,7 +22,7 @@ AC_PROG_CPP
 
 m4_pattern_allow([PKG_CONFIG_NAME])
 PKG_CONFIG_NAME="blosc"
-PKG_LIBS="-lblosc"
+PKG_LIBS=""
 PKG_CPPFLAGS=""
 
 PKG_PROG_PKG_CONFIG
@@ -41,26 +41,7 @@ if test "x${INCLUDE_DIR}${LIB_DIR}" = x; then
       ;;
     esac
   fi
-  if test "x${PKGCONFIG_CFLAGS}${PKGCONFIG_LIBS}" = x; then
-    case "${host_os}" in
-      darwin*)
-      cpre=''
-      for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/$(uname -m) /sw; do
-        if test -e "${pre}/include/blosc.h"; then
-          cpre=${pre}; break
-        fi
-      done
-      if test -n "${cpre}"; then
-        PKG_CPPFLAGS="-I${cpre}/include"
-        if test "${cpre}" = /usr; then
-          PKG_LIBS="-lblosc -llz4 -lzstd -lz"
-        else
-          PKG_LIBS="-L${cpre}/lib -lblosc -llz4 -lzstd -lz"
-        fi
-      fi
-    ;;
-    esac
-  else
+  if test "x${PKGCONFIG_CFLAGS}${PKGCONFIG_LIBS}" != x; then
     echo "Found pkg-config cflags and libs!"
     PKG_CPPFLAGS="${PKGCONFIG_CFLAGS}"
     PKG_LIBS="${PKGCONFIG_LIBS}"
@@ -75,9 +56,22 @@ if test "x${PKG_CPPFLAGS}" = x; then
   case "${host_os}" in
     darwin*)
       AC_MSG_NOTICE([attempting to install blosc from mac.R-project.org])
+      SILENT_INSTALL_R=1
       sudo "${R_HOME}/Rscript" -e "source('https://mac.R-project.org/bin/install.R');install.libs('blosc')"
-      PKG_CPPFLAGS=`"${PKG_CONFIG}" --cflags --silence-errors "${PKG_CONFIG_NAME}"`
-      PKG_LIBS=`"${PKG_CONFIG}" --libs --static "${PKG_CONFIG_NAME}"`
+      cpre=''
+      for pre in /usr /usr/X11 /usr/X11R6 /usr/local /opt /opt/R/$(uname -m) /sw; do
+        if test -e "${pre}/include/blosc.h"; then
+          cpre=${pre}; break
+        fi
+      done
+      if test -n "${cpre}"; then
+        PKG_CPPFLAGS="-I${cpre}/include"
+        if test "${cpre}" = /usr; then
+          PKG_LIBS="-lblosc -llz4 -lzstd -lz"
+        else
+          PKG_LIBS="-L${cpre}/lib -lblosc -llz4 -lzstd -lz"
+        fi
+      fi
 
     ;;
   esac
