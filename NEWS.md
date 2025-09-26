@@ -1,4 +1,4 @@
-# blosc 0.1.1.0003
+# blosc 0.1.2
 
 * Updates to configure script
 
