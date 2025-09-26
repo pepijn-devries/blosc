@@ -4,6 +4,9 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pepijn-devries/blosc/actions/workflows/R-CMD-check.yaml)
+[![version](https://www.r-pkg.org/badges/version/blosc)](https://CRAN.R-project.org/package=blosc)
+[![cran
+checks](https://badges.cranchecks.info/worst/blosc.svg)](https://cran.r-project.org/web/checks/check_results_blosc.html)
 [![R-universe
 version](https://pepijn-devries.r-universe.dev/blosc/badges/version)](https://pepijn-devries.r-universe.dev/blosc)
 [![Codecov test
