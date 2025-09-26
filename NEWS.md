@@ -1,3 +1,7 @@
+# blosc 0.1.2.0001
+
+* Added CRAN badges
+
 # blosc 0.1.2
 
 * Updates to configure script
