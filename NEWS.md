@@ -1,5 +1,6 @@
-# blosc 0.1.2.0001
+# blosc 0.1.2.0002
 
+* Updated documentation
 * Added CRAN badges
 
 # blosc 0.1.2

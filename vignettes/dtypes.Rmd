@@ -37,9 +37,9 @@ The package at hand uses
 Why is this?
 
 The old version is used as it still includes the endianness in its encoding and is
-more compact. In combination with the endianness version 3 types can easily be annotated
-with version 2 data types. You have to do this conversion yourself, it is not implemented
-by this package.
+more compact. You can use dedicated
+[Zarr](https://cran.r-project.org/package=zarr) interpreters to handle
+more recent format specifications.
 
 ## Overview of Data Types
 
