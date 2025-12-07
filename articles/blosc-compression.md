@@ -1,0 +1,151 @@
+# Blosc Compression
+
+## Compress with Blosc
+
+### Input data
+
+When your input data is of type
+[`raw()`](https://rdrr.io/r/base/raw.html), it is assumed that it
+encodes a data type where each element is `typesize` bytes long. The
+data type can be any structured form of data and does not necessarily
+needs to be known. Of course you need to know the structure when you
+need to interpret the data, but that’s not up to the Blosc compressor.
+
+The example below compresses the
+[`raw()`](https://rdrr.io/r/base/raw.html) data assuming that the data
+type is 2 bytes long.
+
+``` r
+library(blosc)
+data_input <- as.raw(c(1, 2, 3, 4, 1, 2, 3, 4))
+blosc_compress(data_input, typesize = 2)
+#>  [1] 02 01 12 02 08 00 00 00 08 00 00 00 18 00 00 00 01 02 03 04 01 02 03 04
+```
+
+Note that the length of the resulting data is actually longer than that
+of the input data. This is because the compressor has an overhead. The
+data set is just too small compared to the overhead.
+
+Can you compress other data types with Blosc? Yes you can. You first
+have to encode it to a binary form
+([`raw()`](https://rdrr.io/r/base/raw.html)), with for instance
+[`r_to_dtype()`](https://pepijn-devries.github.io/blosc/reference/dtype.md)
+or any other method that converts your data into a
+[`raw()`](https://rdrr.io/r/base/raw.html) format. You can also use the
+`dtype` argument to encode and compress your data in one go. In that
+case you need to specify an appropriate data type
+([`vignette("dtypes")`](https://pepijn-devries.github.io/blosc/articles/dtypes.md)).
+
+The example below shows how to encode
+[`numeric()`](https://rdrr.io/r/base/numeric.html) values as
+little-endian 16 bit floating point data (`"<f2"`) and compresses it.
+
+``` r
+## The line below won't work as the default `typesize` (4) does
+## not match with the dtype size (2)
+## blosc_compress(iris$Petal.Length, dtype = "<f2")
+
+## Explicitely set the `typesize` to 2
+compressed_iris <-
+  blosc_compress(iris$Petal.Length, typesize = 2, dtype = "<f2")
+```
+
+### Output
+
+The output is always a vector of
+[`raw()`](https://rdrr.io/r/base/raw.html) data. Generally, the output
+data should be smaller than the input data. There are exceptions. One is
+seen above, where the data set is too small in comparison with the
+compressor overhead. Another case is where the data is just too random,
+where the compressor algorithm simply can’t compress the data. In the
+its compressed form, the data can no longer be interpreted directly. You
+need to decompress it first
+([`blosc_decompress()`](https://pepijn-devries.github.io/blosc/reference/blosc.md)).
+
+### Compression Algorithms
+
+You can pick from several algorithms to compress your data: `"blosclz"`,
+`"lz4"`, `"lz4hc"`, `"zlib"`, or `"zstd"`. There is not a single
+algorithm that always has the best performance (speed and compression
+level). It really depends on your data and can be tested by trial and
+error. You can also lower the compression `level` argument if you prefer
+speed over compression level.
+
+## Decompress with Blosc
+
+### Input data
+
+The decompression function
+([`blosc_decompress()`](https://pepijn-devries.github.io/blosc/reference/blosc.md))
+only accepts [`raw()`](https://rdrr.io/r/base/raw.html) data that has
+been compressed with Blosc. It doesn’t have to be created in `R`, it can
+be generated with any software using the [c-blosc
+library](https://github.com/Blosc/c-blosc).
+
+You don’t have to specify the compression algorithm, typesize or
+anything else. All that information is embedded in the header of the raw
+input data. You can even retrieve this information with:
+
+``` r
+blosc_info( compressed_iris )
+#> $Compressor
+#> [1] "BloscLZ"
+#> 
+#> $`Blosc format version`
+#> [1] 2
+#> 
+#> $`Internal compressor version`
+#> [1] 1
+#> 
+#> $`Type size in bytes`
+#> [1] 2
+#> 
+#> $`Block size in bytes`
+#> [1] 300
+#> 
+#> $`Uncompressed size in bytes`
+#> [1] 300
+#> 
+#> $`Compressed size in bytes`
+#> [1] 316
+#> 
+#> $Shuffle
+#> [1] FALSE
+#> 
+#> $`Pure memcpy`
+#> [1] TRUE
+#> 
+#> $`Bit shuffle`
+#> [1] FALSE
+#> 
+#> attr(,"class")
+#> [1] "blosc_info" "list"
+```
+
+### Output
+
+If you don’t specify the output type, the decompression routine returns
+[`raw()`](https://rdrr.io/r/base/raw.html) data. Do you remember the
+iris length data that we compressed earlier? We can simply decompress it
+by calling
+[`blosc_decompress()`](https://pepijn-devries.github.io/blosc/reference/blosc.md).
+
+``` r
+iris_length1 <- blosc_decompress(compressed_iris)
+head(iris_length1)
+#> [1] 99 3d 99 3d 33 3d
+```
+
+It works, but we got [`raw()`](https://rdrr.io/r/base/raw.html) data as
+output. This is because the decompressor knows little about the data
+structure of the decompressed data. Since we know that we have encoded
+it as little-endian 16 bit floating point values (`"<f2"`), we can
+specify it as such. Once specified, the function will automatically
+decode the data.
+
+``` r
+iris_length2 <- blosc_decompress(compressed_iris, dtype = "<f2")
+hist(iris_length2)
+```
+
+![](blosc-compression_files/figure-html/decompress-type-1.png)

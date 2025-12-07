@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">blosc</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2.0001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2.0002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,9 +97,8 @@ most common conversions.</p>
 2</a> of data type specifications, while they are superseded by <a href="https://zarr-specs.readthedocs.io/en/latest/v3/data-types/index.html" class="external-link">version
 3</a>. Why is this?</p>
 <p>The old version is used as it still includes the endianness in its
-encoding and is more compact. In combination with the endianness version
-3 types can easily be annotated with version 2 data types. You have to
-do this conversion yourself, it is not implemented by this package.</p>
+encoding and is more compact. You can use dedicated <a href="https://cran.r-project.org/package=zarr" class="external-link">Zarr</a> interpreters to
+handle more recent format specifications.</p>
 </div>
 <div class="section level2">
 <h2 id="overview-of-data-types">Overview of Data Types<a class="anchor" aria-label="anchor" href="#overview-of-data-types"></a>
@@ -314,7 +313,7 @@ missing values.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
